@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{878E96F1-3F27-4969-AC21-A66C7FA1ADF2}</ProjectGuid>
+    <NuGetPackageImportStamp>8682f2ae</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <ConfigurationName>Debug</ConfigurationName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <ConfigurationName>Release</ConfigurationName>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="AutoProperties.Fody.nuspec" />
+    <None Include="install.ps1" />
+    <None Include="packages.config" />
+    <None Include="uninstall.ps1" />
+  </ItemGroup>
+  <Target Name="Clean">
+    <RemoveDir Directories="$(SolutionDir)NuGetBuild" />
+  </Target>
+  <Target Name="Build" DependsOnTargets="NuGetBuild" />
+  <Target Name="ReBuild" DependsOnTargets="NuGetBuild" />
+  <Target Name="NuGetBuild" DependsOnTargets="Clean">
+    <MakeDir Directories="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(SolutionDir)AutoProperties\bin\$(Configuration)\netstandard1.0\AutoProperties.dll" DestinationFolder="$(SolutionDir)NuGetBuild\lib\netstandard1.0" />
+    <Copy SourceFiles="$(SolutionDir)AutoProperties\bin\$(Configuration)\netstandard1.0\AutoProperties.xml" DestinationFolder="$(SolutionDir)NuGetBuild\lib\netstandard1.0" />
+    <Copy SourceFiles="$(SolutionDir)NuGet\AutoProperties.Fody.nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(ProjectDir)install.ps1" DestinationFolder="$(SolutionDir)NuGetBuild\Tools" />
+    <Copy SourceFiles="$(ProjectDir)uninstall.ps1" DestinationFolder="$(SolutionDir)NuGetBuild\Tools" />
+    <Copy SourceFiles="$(SolutionDir)AutoProperties.Fody\bin\$(ConfigurationName)\AutoProperties.Fody.dll" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <Copy SourceFiles="$(SolutionDir)AutoProperties.Fody\bin\$(ConfigurationName)\AutoProperties.Fody.pdb" DestinationFolder="$(SolutionDir)NuGetBuild" />
+    <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(SolutionDir)AutoProperties.Fody\bin\$(ConfigurationName)\AutoProperties.Fody.dll" />
+  </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\AutoProperties.Fody\AutoProperties.Fody.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Project>{9AF0FE45-9667-4033-93A5-799846B1A19A}</Project>
+      <Name>AutoProperties.Fody</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AutoProperties\AutoProperties.csproj">
+      <Project>{88856d9c-8c44-4f9c-8b3d-6c29ccc7b08e}</Project>
+      <Name>AutoProperties</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets" Condition="Exists('..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PepitaPackage.1.21.4\build\PepitaPackage.targets'))" />
+  </Target>
+</Project>

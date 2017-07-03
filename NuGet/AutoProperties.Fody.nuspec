@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="2.8">
+    <id>AutoProperties.Fody</id>
+    <version>$version$</version>
+    <title>AutoProperties.Fody</title>
+    <authors>tom-englert</authors>
+    <owners>tom-englert</owners>
+    <developmentDependency>true</developmentDependency>
+    <description>Use this addin to gain access to the backing field of auto properties.</description>
+    <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
+    <projectUrl>https://github.com/tom-englert/AutoProperty.Fody</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <iconUrl>https://raw.github.com/tom-englert/AutoProperty.Fody/master/Icons/package_icon.png</iconUrl>
+    <language>en-US</language>
+    <tags>ILWeaving, Fody, Cecil, INotifyPropertyChanged, Fody.PropertyChanged</tags>
+    <dependencies>
+      <dependency id="Fody" version="[2.0.0, 3.0.0)"/>
+    </dependencies>
+  </metadata>
+</package>
