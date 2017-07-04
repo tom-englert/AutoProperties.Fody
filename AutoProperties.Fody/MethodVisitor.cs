@@ -29,7 +29,7 @@ namespace AutoProperties.Fody
                 foreach (var method in allMethods)
                 {
                     if (method.IsConstructor && shouldBypassAutoPropertySetters)
-                        method.BypassAutoPropertySetters(autoPropertyToBackingFieldMap);
+                        method.BypassAutoPropertySetters(autoPropertyToBackingFieldMap, logger);
 
                     method.ProcessSetBackingFieldCalls(autoPropertyToBackingFieldMap, logger);
                     method.ProcessSetPropertyCalls(autoPropertyToBackingFieldMap, logger);
@@ -37,7 +37,7 @@ namespace AutoProperties.Fody
             }
         }
 
-        private static void BypassAutoPropertySetters(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
+        private static void BypassAutoPropertySetters(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger)
         {
             var instructions = method.Body.Instructions;
 
@@ -50,6 +50,8 @@ namespace AutoProperties.Fody
 
                 if (!autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                     continue;
+
+                logger.LogInfo($"Replace setter of property {propertyName} in method {method.FullName} with backing field assignment.");
 
                 instructions[index] = Instruction.Create(OpCodes.Stfld, propertyInfo.BackingField);
             }
@@ -74,9 +76,11 @@ namespace AutoProperties.Fody
                 if ((instruction.Previous?.Previous?.IsPropertyGetterCall(out propertyName) != true) 
                     || !autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                 {
-                    logger.LogError($"Invalid usage of extension method 'SetBackingField()': {numberOfCalls}. call in method {method.FullName}. This is only valid on member auto-properties.");
+                    logger.LogError($"Invalid usage of extension method 'SetBackingField()': {numberOfCalls}. call in method {method.FullName}. 'SetBackingField()' is only valid on auto-properties of class {method.DeclaringType.Name}.");
                     return;
                 }
+
+                logger.LogInfo($"Replace SetBackingField() on property {propertyName} in method {method.FullName} with backing field assignment.");
 
                 instructions[index] = Instruction.Create(OpCodes.Stfld, propertyInfo.BackingField);
                 instructions.RemoveAt(index - 2);
@@ -103,9 +107,11 @@ namespace AutoProperties.Fody
                 if ((instruction.Previous?.Previous?.IsPropertyGetterCall(out propertyName) != true)
                     || !autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                 {
-                    logger.LogError($"Invalid usage of extension method 'SetProperty()': {numberOfCalls}. call in method {method.FullName}. This is only valid on member auto-properties.");
+                    logger.LogError($"Invalid usage of extension method 'SetProperty()': {numberOfCalls}. call in method {method.FullName}. 'SetProperty()' is only valid on auto-properties of class {method.DeclaringType.Name}.");
                     return;
                 }
+
+                logger.LogInfo($"Replace SetProperty() on property {propertyName} in method {method.FullName} with property setter.");
 
                 instructions[index] = Instruction.Create(OpCodes.Call, propertyInfo.Property.SetMethod);
                 instructions.RemoveAt(index - 2);
