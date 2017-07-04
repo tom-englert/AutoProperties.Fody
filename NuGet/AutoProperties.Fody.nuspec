@@ -9,9 +9,9 @@
     <developmentDependency>true</developmentDependency>
     <description>Use this addin to gain access to the backing field of auto properties.</description>
     <licenseUrl>http://www.opensource.org/licenses/mit-license.php</licenseUrl>
-    <projectUrl>https://github.com/tom-englert/AutoProperty.Fody</projectUrl>
+    <projectUrl>https://github.com/tom-englert/AutoProperties.Fody</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <iconUrl>https://raw.github.com/tom-englert/AutoProperty.Fody/master/Icons/package_icon.png</iconUrl>
+    <iconUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/Icons/package_icon.png</iconUrl>
     <language>en-US</language>
     <tags>ILWeaving, Fody, Cecil, INotifyPropertyChanged, Fody.PropertyChanged</tags>
     <dependencies>

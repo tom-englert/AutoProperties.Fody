@@ -7,7 +7,7 @@ namespace AutoProperties
     /// </summary>
     public static class BackingFieldAccessExtensions
     {
-        private const string Message = "This method should have been replaced by AutoProperty.Fody. Make sure AutoProperty.Fody is properly called during your build and the extension method is placed at an auto-property that is a member of the class.";
+        private const string Message = "This method should have been replaced by AutoProperties.Fody. Make sure AutoProperties.Fody is properly called during your build and the extension method is placed at an auto-property that is a member of the class.";
 
         /// <summary>
         /// Sets the backing field of the auto-property.

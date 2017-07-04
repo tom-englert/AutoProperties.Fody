@@ -28,7 +28,6 @@ public class Class : ObservableObject
     }
 
     public string Property1 { get; set; }
-
     public string Property2 { get; set; }
 }
 
@@ -89,7 +88,7 @@ public class Class : ObservableObject
 The property setters will be bypassed, and no virtual method will be called from within the constructor. 
 
 **NOTE:** This extension method is only valid on auto-properties of the class itself. 
-Trying to use this on something else than an auto-property or on an auto-property of another class - include the base class - will 
+Trying to use this on something else than an auto-property or on an auto-property of another class - including the base class - will 
 generate an error.
 
 ### Using the `BypassAutoPropertySettersInConstructors` attribute
@@ -128,7 +127,7 @@ public class Class : ObservableObject
     public string Property2 { get; set; }
 }
 ```
-HINT: You can opt in on assembly level using `[assembly: BypassAutoPropertySettersInConstructors(false)]`, and then opt out again for individual classes using `[BypassAutoPropertySettersInConstructors(false)]`
+NOTE: You can opt in on assembly level using `[assembly: BypassAutoPropertySettersInConstructors(false)]`, and then opt out again for individual classes using `[BypassAutoPropertySettersInConstructors(false)]`
 
 ### Opting out again with the `SetProperty` extension method
 This extension method can be useful if you have opted in on assembly level with the `BypassAutoPropertySettersInConstructors` attribute, but 
@@ -142,7 +141,7 @@ public class Class : ObservableObject
     public Class(string property1, string property2)
     {
         Property1 = property1;
-        Property2.SetProperty(property);
+        Property2.SetProperty(property2);
     }
 
     public string Property1 { get; set; }
@@ -164,7 +163,7 @@ public class Class : ObservableObject
 }
 ```
 **NOTE:** This extension method is only valid on auto-properties of the class itself. 
-Trying to use this on something else than an auto-property or on an auto-property of another class - include the base class - will 
+Trying to use this on something else than an auto-property or on an auto-property of another class - including the base class - will 
 generate an error.
 
 ## Icon
