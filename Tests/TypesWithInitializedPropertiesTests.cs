@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -79,5 +80,11 @@ public class TypesWithInitializedPropertiesTests
         instance.Property2 = "b";
         Assert.AreEqual(initial + 3, eventCount);
         Assert.IsTrue(instance.IsChanged);
+    }
+
+    [Test]
+    public void DerivedClassWithoutAutoPropertyTweakingCrashesTest()
+    {
+        Assert.Throws(Is.TypeOf<TargetInvocationException>().And.InnerException.TypeOf<NullReferenceException>(), () => assembly.GetInstance("DerivedClassWithExplicitInitializedAutoProperties"));
     }
 }
