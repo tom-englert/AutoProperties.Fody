@@ -10,6 +10,7 @@ public class ModuleWeaver : ILogger
     public Action<string> LogDebug { get; set; }
     public Action<string> LogInfo { get; set; }
     public Action<string> LogWarning { get; set; }
+    public Action<string> LogError { get; set; }
 
     // An instance of Mono.Cecil.ModuleDefinition for processing
     public ModuleDefinition ModuleDefinition { get; set; }
@@ -17,9 +18,7 @@ public class ModuleWeaver : ILogger
     // Init logging delegates to make testing easier
     public ModuleWeaver()
     {
-        LogDebug = m => { };
-        LogInfo = m => { };
-        LogWarning = m => { };
+        LogDebug = LogInfo = LogWarning = LogError = _ => { };
     }
 
     public void Execute()
@@ -41,5 +40,10 @@ public class ModuleWeaver : ILogger
     void ILogger.LogWarning(string message)
     {
         LogWarning(message);
+    }
+
+    void ILogger.LogError(string message)
+    {
+        LogError(message);
     }
 }

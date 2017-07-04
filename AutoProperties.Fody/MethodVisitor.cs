@@ -28,19 +28,19 @@ namespace AutoProperties.Fody
 
                 foreach (var method in allMethods)
                 {
-                    var instructions = method.Body.Instructions;
-
                     if (method.IsConstructor && shouldBypassAutoPropertySetters)
-                        instructions.BypassAutoPropertySetters(autoPropertyToBackingFieldMap);
+                        method.BypassAutoPropertySetters(autoPropertyToBackingFieldMap);
 
-                    instructions.ProcessSetBackingFieldCalls(autoPropertyToBackingFieldMap, logger);
-                    instructions.ProcessSetPropertyCalls(autoPropertyToBackingFieldMap, logger);
+                    method.ProcessSetBackingFieldCalls(autoPropertyToBackingFieldMap, logger);
+                    method.ProcessSetPropertyCalls(autoPropertyToBackingFieldMap, logger);
                 }
             }
         }
 
-        private static void BypassAutoPropertySetters(this Collection<Instruction> instructions, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
+        private static void BypassAutoPropertySetters(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
         {
+            var instructions = method.Body.Instructions;
+
             for (var index = 0; index < instructions.Count; index++)
             {
                 var instruction = instructions[index];
@@ -55,8 +55,11 @@ namespace AutoProperties.Fody
             }
         }
 
-        private static void ProcessSetBackingFieldCalls(this Collection<Instruction> instructions, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger)
+        private static void ProcessSetBackingFieldCalls(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger)
         {
+            var instructions = method.Body.Instructions;
+            var numberOfCalls = 0;
+
             for (var index = 0; index < instructions.Count; index++)
             {
                 var instruction = instructions[index];
@@ -64,12 +67,14 @@ namespace AutoProperties.Fody
                 if (!instruction.IsSetBackingFieldCall())
                     continue;
 
-                var propertyName = String.Empty;
+                numberOfCalls += 1;
+
+                var propertyName = string.Empty;
 
                 if ((instruction.Previous?.Previous?.IsPropertyGetterCall(out propertyName) != true) 
                     || !autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                 {
-                    logger.LogWarning("Invalid usage of extension method 'SetBackingField'. This is only valid on member auto-properties.");
+                    logger.LogError($"Invalid usage of extension method 'SetBackingField()': {numberOfCalls}. call in method {method.FullName}. This is only valid on member auto-properties.");
                     return;
                 }
 
@@ -79,8 +84,11 @@ namespace AutoProperties.Fody
             }
         }
 
-        private static void ProcessSetPropertyCalls(this Collection<Instruction> instructions, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger)
+        private static void ProcessSetPropertyCalls(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger)
         {
+            var instructions = method.Body.Instructions;
+            var numberOfCalls = 0;
+
             for (var index = 0; index < instructions.Count; index++)
             {
                 var instruction = instructions[index];
@@ -88,12 +96,14 @@ namespace AutoProperties.Fody
                 if (!instruction.IsSetPropertyCall())
                     continue;
 
-                var propertyName = String.Empty;
+                numberOfCalls += 1;
+
+                var propertyName = string.Empty;
 
                 if ((instruction.Previous?.Previous?.IsPropertyGetterCall(out propertyName) != true)
                     || !autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                 {
-                    logger.LogWarning("Invalid usage of extension method 'SetProperty'. This is only valid on member auto-properties.");
+                    logger.LogError($"Invalid usage of extension method 'SetProperty()': {numberOfCalls}. call in method {method.FullName}. This is only valid on member auto-properties.");
                     return;
                 }
 
