@@ -5,7 +5,7 @@
 
 Usually there is no need to access the backing field of an auto-property, because the property setter does just write to the backing field - no more an no less.<para/>
 
-However the story is different when some Fody plug-in has extended the setter of auto-properties, like e.g. Fody.PropertyChanged does.
+However the story is different when some [Fody](https://github.com/Fody/Fody/) plug-in has extended the setter of auto-properties, like e.g. [Fody.PropertyChanged](https://github.com/Fody/PropertyChanged) does.
 
 When assigning a value to the property, the now modified setter calls `OnPropertyChanged`, which is virtual by default.
 If you do this from within the constructor, the constructor has not yet finished, any event handlers assigned in the constructor or code in the overwritten `OnPropertyChanged` method will work on an only partial initialized object, 
