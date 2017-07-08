@@ -9,7 +9,7 @@ However the story is different when some [Fody](https://github.com/Fody/Fody/) p
 
 When assigning a value to the property, the now modified setter calls `OnPropertyChanged`, which is virtual by default.
 If you do this from within the constructor, the constructor has not yet finished, any event handlers assigned in the constructor or code in the overwritten `OnPropertyChanged` method will work on an only partial initialized object, 
-which can easily lead to crashes if the event handler is not aware of this. This is why you get e.g. the [CA2214](https://msdn.microsoft.com/en-us/library/ms182331.aspx) warning.
+which can easily lead to crashes if the event handler is not aware of this. This is why you get e.g. the [CA2214](https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2214-do-not-call-overridable-methods-in-constructors) warning.
 
 With old-style properties you can just bypass this problem by initializing the backing field instead of the property, but with auto-properties you have no chance to do so.
 
@@ -55,7 +55,9 @@ public class Derived : Class
 
 ### Using the `SetBackingField` extension method
 Using the `SetBackingField` extension method you can control backing field access per property. 
-This is very explicit and visible, so it should be clear to everyone what happens:
+This is the recommended usage: It is very explicit and visible, so it should be clear to everyone what happens.
+It will fix [CA2214](https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2214-do-not-call-overridable-methods-in-constructors) for the 
+Roslyn source code analyzers as well as for the older FxCop IL-analyzer.
 
 ```C#
 public class Class : ObservableObject
@@ -96,8 +98,11 @@ With this attribute you can control backing field access on a wider scope.
 You can apply this to individual classes or even to a whole assembly.
 
 All auto-property setters in all constructors in the scope will be replaced with a setter of the backing field.
-This is not as obvious as using the `SetBackingField` extension method, so use with care. 
+This is not as obvious as using the `SetBackingField` extension method, so use with special care. 
 A use case is e.g. an assembly with lots of POCO classes that should be made observable with minimal code changes.
+
+Since the effect of this will only be visible in the IL-code, the Roslyn source code analyzers will still complain 
+about [CA2214](https://docs.microsoft.com/en-us/visualstudio/code-quality/ca2214-do-not-call-overridable-methods-in-constructors).
 
 ```C#
 [BypassAutoPropertySettersInConstructors(true)]
