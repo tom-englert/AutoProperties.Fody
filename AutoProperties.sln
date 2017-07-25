@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{658C631F-94E7-40FC-96D5-DF82FFF8B844}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		Relase notes.md = Relase notes.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoProperties.portable", "AutoProperties\AutoProperties.portable.csproj", "{59ACF1B9-0CB8-4673-9E00-E742E2616959}"

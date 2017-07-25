@@ -1,0 +1,5 @@
+**1.0.0.0**
+- Add support for .Net 4.0 projects
+
+**0.9.1.0**
+- Initial release
