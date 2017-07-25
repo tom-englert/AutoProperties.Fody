@@ -15,9 +15,7 @@
   <ItemGroup>
     <None Include="AutoProperties.Fody.nuspec" />
     <None Include="install.ps1" />
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
     <None Include="uninstall.ps1" />
   </ItemGroup>
   <Target Name="Clean">
