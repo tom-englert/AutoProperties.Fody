@@ -1,9 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
-using Mono.Collections.Generic;
 
 namespace AutoProperties.Fody
 {
@@ -19,7 +17,7 @@ namespace AutoProperties.Fody
             foreach (var classDefinition in allClasses)
             {
                 var shouldBypassAutoPropertySetters = classDefinition.ShouldBypassAutoPropertySettersInConstructors() 
-                    ?? moduleDefinition.ShouldBypassAutoPropertySettersInConstructors() 
+                    ?? moduleDefinition.Assembly.ShouldBypassAutoPropertySettersInConstructors() 
                     ?? false;
 
                 var autoPropertyToBackingFieldMap = new AutoPropertyToBackingFieldMap(classDefinition);
