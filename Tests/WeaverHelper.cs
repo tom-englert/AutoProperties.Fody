@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
@@ -50,6 +51,9 @@ namespace Tests
                 };
 
                 weavingTask.Execute();
+
+                var version = moduleDefinition.Assembly.Name.Version;
+                moduleDefinition.Assembly.Name.Version = new Version(0, 2, 0, version.Revision);
                 moduleDefinition.Write(NewAssemblyPath);
             }
 

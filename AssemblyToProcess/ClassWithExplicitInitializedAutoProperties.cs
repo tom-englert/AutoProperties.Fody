@@ -95,6 +95,43 @@ public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoProp
     public bool IsChanged { get; set; }
 }
 
+public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter : ObservableObject
+{
+    public ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter()
+    {
+        // That's too complex, SetBackingField will fail.
+        Property2.SetBackingField("Test" + Math.Abs(2));
+        Property1.SetBackingField(Property2 + "A");
+        Property1.SetBackingField(Property2.TrimEnd('2'));
+    }
+
+    public string Property1 { get; set; }
+
+    public string Property2 { get; set; }
+
+    public bool IsChanged { get; set; }
+}
+
+public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithVariableParameters : ObservableObject
+{
+    public ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithVariableParameters()
+    {
+        var value = "Test" + Math.Abs(2);
+
+        Property2.SetBackingField(value);
+
+        var value2 = Property2 + "A";
+
+        Property1.SetBackingField(value2);
+    }
+
+    public string Property1 { get; set; }
+
+    public string Property2 { get; set; }
+
+    public bool IsChanged { get; set; }
+}
+
 [BypassAutoPropertySettersInConstructors(true)]
 public class ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySettersAndExplicitSetProperty1 : ObservableObject
 {

@@ -3,14 +3,18 @@
 using AutoProperties.Fody;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 public class ModuleWeaver : ILogger
 {
+    private bool _hasErrors;
+
     // Will log an informational message to MSBuild
     public Action<string> LogDebug { get; set; }
     public Action<string> LogInfo { get; set; }
     public Action<string> LogWarning { get; set; }
     public Action<string> LogError { get; set; }
+    public Action<string, SequencePoint> LogErrorPoint { get; set; }
 
     // An instance of Mono.Cecil.ModuleDefinition for processing
     public ModuleDefinition ModuleDefinition { get; set; }
@@ -19,12 +23,15 @@ public class ModuleWeaver : ILogger
     public ModuleWeaver()
     {
         LogDebug = LogInfo = LogWarning = LogError = _ => { };
+        LogErrorPoint = (_, __) => { };
     }
 
     public void Execute()
     {
         ModuleDefinition.VisitAllMethods(this);
-        ModuleDefinition.RemoveReferences(this);
+
+        if (!_hasErrors)
+            ModuleDefinition.RemoveReferences(this);
     }
 
     void ILogger.LogDebug(string message)
@@ -42,8 +49,17 @@ public class ModuleWeaver : ILogger
         LogWarning(message);
     }
 
-    void ILogger.LogError(string message)
+    void ILogger.LogError(string message, SequencePoint sequencePoint)
     {
-        LogError(message);
+        _hasErrors = true;
+
+        if (sequencePoint != null)
+        {
+            LogErrorPoint(message, sequencePoint);
+        }
+        else
+        {
+            LogError(message);
+        }
     }
 }

@@ -45,11 +45,13 @@ public class TypesWithInitializedPropertiesTests
     // with .SetBackingField..
     [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySetters",
         "Test", "Test2", false, new string[0])]
+    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithVariableParameters",
+        "Test2A", "Test2", false, new string[0])]
     // with class level [BypassAutoPropertySettersInConstructors(true)] and .SetProperty...
     [TestCase("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySettersAndExplicitSetProperty1",
         "Test", "Test2", true, new[] { "IsChanged", "Property1" })]
 
-    public void TypesWithInitializedPropertiesTest(string className, string property1Value, string property2Value, bool isChangedStateAfterConstructor, string[] expectedPropertyChangedCallsInConstructor)
+    public void Test(string className, string property1Value, string property2Value, bool isChangedStateAfterConstructor, string[] expectedPropertyChangedCallsInConstructor)
     {
         var instance = assembly.GetInstance(className);
 
@@ -80,6 +82,17 @@ public class TypesWithInitializedPropertiesTests
         instance.Property2 = "b";
         Assert.AreEqual(initial + 3, eventCount);
         Assert.IsTrue(instance.IsChanged);
+    }
+
+    [Test]
+    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter",
+        "Test", "Test2", false, new string[0])]
+    public void TestClassesWithErrors(string className, string property1Value, string property2Value, bool isChangedStateAfterConstructor, string[] expectedPropertyChangedCallsInConstructor)
+    {
+        Assert.Throws<TargetInvocationException>(() =>
+        {
+            Test(className, property1Value, property2Value, isChangedStateAfterConstructor, expectedPropertyChangedCallsInConstructor);
+        });
     }
 
     [Test]
