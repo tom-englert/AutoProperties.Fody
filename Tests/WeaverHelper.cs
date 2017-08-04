@@ -43,7 +43,7 @@ namespace Tests
 
             File.Copy(OriginalAssemblyPath, NewAssemblyPath, true);
 
-            using (var moduleDefinition = ModuleDefinition.ReadModule(OriginalAssemblyPath))
+            using (var moduleDefinition = ModuleDefinition.ReadModule(OriginalAssemblyPath, new ReaderParameters(ReadingMode.Immediate) { ReadSymbols = true }))
             {
                 var weavingTask = new ModuleWeaver
                 {
@@ -54,7 +54,7 @@ namespace Tests
 
                 var version = moduleDefinition.Assembly.Name.Version;
                 moduleDefinition.Assembly.Name.Version = new Version(0, 2, 0, version.Revision);
-                moduleDefinition.Write(NewAssemblyPath);
+                moduleDefinition.Write(NewAssemblyPath, new WriterParameters { WriteSymbols = true });
             }
 
             Assembly = Assembly.LoadFile(NewAssemblyPath);

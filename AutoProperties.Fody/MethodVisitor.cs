@@ -1,17 +1,35 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
 namespace AutoProperties.Fody
 {
-    internal static class MethodVisitor
+    internal static class MethodVisitorExtensions
     {
         internal static void VisitAllMethods(this ModuleDefinition moduleDefinition, ILogger logger)
         {
-            var symbolReader = moduleDefinition.SymbolReader;
+            new MethodVisitor(moduleDefinition, logger).VisitAllMethods();
+        }
+    }
 
-            var allTypes = moduleDefinition.GetTypes();
+    internal class MethodVisitor
+    {
+        private readonly ModuleDefinition _moduleDefinition;
+        private readonly ILogger _logger;
+        private readonly ISymbolReader _symbolReader;
+
+        public MethodVisitor(ModuleDefinition moduleDefinition, ILogger logger)
+        {
+            _logger = logger;
+            _moduleDefinition = moduleDefinition;
+            _symbolReader = moduleDefinition.SymbolReader;
+        }
+
+        internal void VisitAllMethods()
+        {
+            var allTypes = _moduleDefinition.GetTypes();
 
             var allClasses = allTypes
                 .Where(x => x.IsClass && (x.BaseType != null));
@@ -19,7 +37,7 @@ namespace AutoProperties.Fody
             foreach (var classDefinition in allClasses)
             {
                 var shouldBypassAutoPropertySetters = classDefinition.ShouldBypassAutoPropertySettersInConstructors()
-                    ?? moduleDefinition.Assembly.ShouldBypassAutoPropertySettersInConstructors()
+                    ?? _moduleDefinition.Assembly.ShouldBypassAutoPropertySettersInConstructors()
                     ?? false;
 
                 var autoPropertyToBackingFieldMap = new AutoPropertyToBackingFieldMap(classDefinition);
@@ -29,15 +47,15 @@ namespace AutoProperties.Fody
                 foreach (var method in allMethods)
                 {
                     if (method.IsConstructor && shouldBypassAutoPropertySetters)
-                        method.BypassAutoPropertySetters(autoPropertyToBackingFieldMap, logger);
+                        BypassAutoPropertySetters(method, autoPropertyToBackingFieldMap);
 
-                    method.ProcessSetBackingFieldCalls(autoPropertyToBackingFieldMap, logger, symbolReader);
-                    method.ProcessSetPropertyCalls(autoPropertyToBackingFieldMap, logger, symbolReader);
+                    ProcessSetBackingFieldCalls(method, autoPropertyToBackingFieldMap);
+                    ProcessSetPropertyCalls(method, autoPropertyToBackingFieldMap);
                 }
             }
         }
 
-        private static void BypassAutoPropertySetters(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger)
+        private void BypassAutoPropertySetters(MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
         {
             var instructions = method.Body.Instructions;
 
@@ -51,74 +69,46 @@ namespace AutoProperties.Fody
                 if (!autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                     continue;
 
-                logger.LogInfo($"Replace setter of property {propertyName} in method {method.FullName} with backing field assignment.");
+                _logger.LogInfo($"Replace setter of property {propertyName} in method {method.FullName} with backing field assignment.");
 
                 instructions[index] = Instruction.Create(OpCodes.Stfld, propertyInfo.BackingField);
             }
         }
 
-        private static void ProcessSetBackingFieldCalls(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger, ISymbolReader symbolReader)
+        private void ProcessSetBackingFieldCalls(MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
+        {
+            ProcessExtensionMethodCalls(method, autoPropertyToBackingFieldMap, "SetBackingField", pi => Instruction.Create(OpCodes.Stfld, pi.BackingField));
+        }
+
+        private void ProcessSetPropertyCalls(MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
+        {
+            ProcessExtensionMethodCalls(method, autoPropertyToBackingFieldMap, "SetProperty", pi => Instruction.Create(OpCodes.Call, pi.Property.SetMethod));
+        }
+
+        private void ProcessExtensionMethodCalls(MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, string methodName, Func<AutoPropertyInfo, Instruction> createInstruction)
         {
             var instructions = method.Body.Instructions;
-            var numberOfCalls = 0;
 
             for (var index = 0; index < instructions.Count; index++)
             {
                 var instruction = instructions[index];
 
-                if (!instruction.IsSetBackingFieldCall())
+                if (!instruction.IsExtensionMethodCall(methodName))
                     continue;
-
-                numberOfCalls += 1;
 
                 var propertyName = string.Empty;
 
                 if ((instruction.Previous?.Previous?.IsPropertyGetterCall(out propertyName) != true)
                     || !autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                 {
-                    var message = $"Invalid usage of extension method 'SetBackingField()': {numberOfCalls}. call in method {method.FullName}."
-                                + $" 'SetBackingField()' is only valid on auto-properties of class {method.DeclaringType.Name} and with simple parameters like constants, arguments or variables.";
-                    logger.LogError(message, symbolReader?.Read(method)?.GetSequencePoint(instruction));
+                    var message = $"Invalid usage of extension method '{methodName}()': '{methodName}()' is only valid on auto-properties of class {method.DeclaringType.Name} and with simple parameters like constants, arguments or variables.";
+                    _logger.LogError(message, _symbolReader?.Read(method)?.GetSequencePoint(instruction));
                     return;
                 }
 
-                logger.LogInfo($"Replace SetBackingField() on property {propertyName} in method {method.FullName} with backing field assignment.");
+                _logger.LogInfo($"Replace {methodName}() on property {propertyName} in method {method.FullName}.");
 
-                instructions[index] = Instruction.Create(OpCodes.Stfld, propertyInfo.BackingField);
-                instructions.RemoveAt(index - 2);
-                index -= 1;
-            }
-        }
-
-        private static void ProcessSetPropertyCalls(this MethodDefinition method, AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap, ILogger logger, ISymbolReader symbolReader)
-        {
-            var instructions = method.Body.Instructions;
-            var numberOfCalls = 0;
-
-            for (var index = 0; index < instructions.Count; index++)
-            {
-                var instruction = instructions[index];
-
-                if (!instruction.IsSetPropertyCall())
-                    continue;
-
-                numberOfCalls += 1;
-
-                var propertyName = string.Empty;
-
-                if ((instruction.Previous?.Previous?.IsPropertyGetterCall(out propertyName) != true)
-                    || !autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
-                {
-                    var message = $"Invalid usage of extension method 'SetProperty()': {numberOfCalls}. call in method {method.FullName}."
-                                + $" 'SetProperty()' is only valid on auto-properties of class {method.DeclaringType.Name}.";
-
-                    logger.LogError(message, symbolReader?.Read(method)?.GetSequencePoint(instruction));
-                    return;
-                }
-
-                logger.LogInfo($"Replace SetProperty() on property {propertyName} in method {method.FullName} with property setter.");
-
-                instructions[index] = Instruction.Create(OpCodes.Call, propertyInfo.Property.SetMethod);
+                instructions[index] = createInstruction(propertyInfo);
                 instructions.RemoveAt(index - 2);
                 index -= 1;
             }

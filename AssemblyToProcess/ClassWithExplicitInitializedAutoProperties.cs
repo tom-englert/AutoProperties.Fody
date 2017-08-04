@@ -36,12 +36,8 @@ public class DerivedClassWithExplicitInitializedAutoProperties : ClassWithExplic
 
     public DerivedClassWithExplicitInitializedAutoProperties(IList<string> changes)
     {
-        if (changes == null)
-            throw new ArgumentNullException(nameof(changes));
-
-        _changes = changes;
+        _changes = changes ?? throw new ArgumentNullException(nameof(changes));
     }
-
 
     protected override void OnPropertyChanged(string propertyName)
     {

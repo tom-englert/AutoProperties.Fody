@@ -70,17 +70,7 @@ namespace AutoProperties.Fody
             return fields.FirstOrDefault(field => field.Name == $"<{propertyName}>k__BackingField");
         }
 
-        public static bool IsSetBackingFieldCall(this Instruction instruction)
-        {
-            return instruction.IsExtensionMethodCall("SetBackingField");
-        }
-
-        public static bool IsSetPropertyCall(this Instruction instruction)
-        {
-            return instruction.IsExtensionMethodCall("SetProperty");
-        }
-
-        private static bool IsExtensionMethodCall(this Instruction instruction, string methodName)
+        public static bool IsExtensionMethodCall(this Instruction instruction, string methodName)
         { 
         if (instruction.OpCode.Code != Code.Call)
                 return false;
