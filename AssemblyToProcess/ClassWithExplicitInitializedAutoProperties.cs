@@ -96,7 +96,6 @@ public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoProp
 {
     public ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter()
     {
-        // That's too complex, SetBackingField will fail.
         Property2.SetBackingField("Test" + Math.Abs(2));
         Property1.SetBackingField(Property2 + "A");
         Property1.SetBackingField(Property2.TrimEnd('2'));
