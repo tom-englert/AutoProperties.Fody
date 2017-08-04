@@ -1,6 +1,15 @@
-﻿using System;
+﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
+#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
+// ReSharper disable AssignNullToNotNullAttribute
+// ReSharper disable PossibleNullReferenceException
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+
+using System;
 
 using AutoProperties.Fody;
+
+using JetBrains.Annotations;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -34,22 +43,22 @@ public class ModuleWeaver : ILogger
             ModuleDefinition.RemoveReferences(this);
     }
 
-    void ILogger.LogDebug(string message)
+    void ILogger.LogDebug([NotNull] string message)
     {
         LogDebug(message);
     }
 
-    void ILogger.LogInfo(string message)
+    void ILogger.LogInfo([NotNull] string message)
     {
         LogInfo(message);
     }
 
-    void ILogger.LogWarning(string message)
+    void ILogger.LogWarning([NotNull] string message)
     {
         LogWarning(message);
     }
 
-    void ILogger.LogError(string message, SequencePoint sequencePoint)
+    void ILogger.LogError([NotNull] string message, [CanBeNull] SequencePoint sequencePoint)
     {
         _hasErrors = true;
 

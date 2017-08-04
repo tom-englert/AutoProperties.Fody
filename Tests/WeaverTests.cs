@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+
+using JetBrains.Annotations;
 
 using NUnit.Framework;
 
@@ -9,9 +12,11 @@ using Tests;
 [TestFixture]
 public class WeaverTests
 {
-    readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
+    [NotNull]
+    private readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
 
     [Test]
+    [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
     public void ValidatePropertyChangedIsInjected()
     {
         var assembly = _weaverHelper.Assembly;

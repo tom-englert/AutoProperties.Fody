@@ -1,17 +1,23 @@
-﻿using System;
+﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
+#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
+using JetBrains.Annotations;
+
 using NUnit.Framework;
 
 using Tests;
 
-public class TypesWithInitializedPropertiesTests
+public class PropertiesTests
 {
-    readonly Assembly assembly = WeaverHelper.Create().Assembly;
+    [NotNull]
+    private readonly Assembly assembly = WeaverHelper.Create().Assembly;
 
     [Test]
     // default behavior (baseline)
@@ -47,11 +53,13 @@ public class TypesWithInitializedPropertiesTests
         "Test", "Test2", false, new string[0])]
     [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithVariableParameters",
         "Test2A", "Test2", false, new string[0])]
+    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter",
+        "Test", "Test2", false, new string[0])]
     // with class level [BypassAutoPropertySettersInConstructors(true)] and .SetProperty...
     [TestCase("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySettersAndExplicitSetProperty1",
         "Test", "Test2", true, new[] { "IsChanged", "Property1" })]
 
-    public void Test(string className, string property1Value, string property2Value, bool isChangedStateAfterConstructor, string[] expectedPropertyChangedCallsInConstructor)
+    public void Test([NotNull] string className, [CanBeNull] string property1Value, [CanBeNull] string property2Value, bool isChangedStateAfterConstructor, [NotNull] string[] expectedPropertyChangedCallsInConstructor)
     {
         var instance = assembly.GetInstance(className);
 
@@ -85,19 +93,13 @@ public class TypesWithInitializedPropertiesTests
     }
 
     [Test]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter",
-        "Test", "Test2", false, new string[0])]
-    public void TestClassesWithErrors(string className, string property1Value, string property2Value, bool isChangedStateAfterConstructor, string[] expectedPropertyChangedCallsInConstructor)
-    {
-        Assert.Throws<TargetInvocationException>(() =>
-        {
-            Test(className, property1Value, property2Value, isChangedStateAfterConstructor, expectedPropertyChangedCallsInConstructor);
-        });
-    }
-
-    [Test]
     public void DerivedClassWithoutAutoPropertyTweakingCrashesTest()
     {
-        Assert.Throws(Is.TypeOf<TargetInvocationException>().And.InnerException.TypeOf<NullReferenceException>(), () => assembly.GetInstance("DerivedClassWithExplicitInitializedAutoProperties"));
+        // ReSharper disable PossibleNullReferenceException
+        Assert.Throws(Is.TypeOf<TargetInvocationException>().And.InnerException.TypeOf<NullReferenceException>(), () =>
+        {
+            assembly.GetInstance("DerivedClassWithExplicitInitializedAutoProperties");
+        });
+        // ReSharper restore PossibleNullReferenceException
     }
 }

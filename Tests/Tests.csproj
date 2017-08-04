@@ -65,7 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="TypesWithInitializedPropertiesTests.cs" />
+    <Compile Include="PropertiesTests.cs" />
     <Compile Include="Verifier.cs" />
     <Compile Include="WeaverHelper.cs" />
     <Compile Include="WeaverTests.cs" />

@@ -1,11 +1,12 @@
-﻿using AutoProperties;
+﻿// ReSharper disable All
+using AutoProperties;
 
 using PropertyChanged;
 
 [AddINotifyPropertyChangedInterface]
 public class ImplementsPropertyChanged
 {
-    InnerImplementsPropertyChanged _inner = new InnerImplementsPropertyChanged();
+    private readonly InnerImplementsPropertyChanged _inner = new InnerImplementsPropertyChanged();
 
     public string Property1 { get; set; }
 

@@ -1,5 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
+#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
+
+using System.Collections.Generic;
 using System.Linq;
+
+using JetBrains.Annotations;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
@@ -8,8 +13,9 @@ namespace AutoProperties.Fody
 {
     internal static class ExtensionMethods
     {
-        public static bool? ShouldBypassAutoPropertySettersInConstructors(this ICustomAttributeProvider node)
+        public static bool? ShouldBypassAutoPropertySettersInConstructors([CanBeNull] this ICustomAttributeProvider node)
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
             return node?
                 .CustomAttributes
                 .GetAttribute("AutoProperties.BypassAutoPropertySettersInConstructorsAttribute")?
@@ -18,22 +24,26 @@ namespace AutoProperties.Fody
                 .FirstOrDefault();
         }
 
-        private static CustomAttribute GetAttribute(this IEnumerable<CustomAttribute> attributes, string attributeName)
+        [CanBeNull]
+        private static CustomAttribute GetAttribute([NotNull, ItemNotNull] this IEnumerable<CustomAttribute> attributes, [CanBeNull] string attributeName)
         {
-            return attributes.FirstOrDefault(attribute => attribute.Constructor.DeclaringType.FullName == attributeName);
+            return attributes.FirstOrDefault(attribute => attribute.Constructor?.DeclaringType?.FullName == attributeName);
         }
 
-        public static bool IsPropertySetterCall(this Instruction instruction, out string propertyName)
+        [ContractAnnotation("propertyName:notnull => true")]
+        public static bool IsPropertySetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
         {
             return IsPropertyCall(instruction, "set_", out propertyName);
         }
 
-        public static bool IsPropertyGetterCall(this Instruction instruction, out string propertyName)
+        [ContractAnnotation("propertyName:notnull => true")]
+        public static bool IsPropertyGetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
         {
             return IsPropertyCall(instruction, "get_", out propertyName);
         }
 
-        private static bool IsPropertyCall(this Instruction instruction, string prefix, out string propertyName)
+        [ContractAnnotation("propertyName:notnull => true")]
+        private static bool IsPropertyCall([NotNull] this Instruction instruction, [NotNull] string prefix, [CanBeNull] out string propertyName)
         {
             propertyName = null;
 
@@ -54,7 +64,7 @@ namespace AutoProperties.Fody
             }
 
             var operandName = operand.Name;
-            if (!operandName.StartsWith(prefix))
+            if (operandName?.StartsWith(prefix) != true)
             {
                 return false;
             }
@@ -63,16 +73,18 @@ namespace AutoProperties.Fody
             return true;
         }
 
-        public static FieldDefinition FindAutoPropertyBackingField(this PropertyDefinition property, IEnumerable<FieldDefinition> fields)
+        [CanBeNull]
+        public static FieldDefinition FindAutoPropertyBackingField([NotNull] this PropertyDefinition property, [NotNull, ItemNotNull] IEnumerable<FieldDefinition> fields)
         {
             var propertyName = property.Name;
 
             return fields.FirstOrDefault(field => field.Name == $"<{propertyName}>k__BackingField");
         }
 
-        public static bool IsExtensionMethodCall(this Instruction instruction, string methodName)
+        [ContractAnnotation("instruction:notnull => true")]
+        public static bool IsExtensionMethodCall([CanBeNull] this Instruction instruction, [CanBeNull] string methodName)
         { 
-        if (instruction.OpCode.Code != Code.Call)
+        if (instruction?.OpCode.Code != Code.Call)
                 return false;
 
             var operand = instruction.Operand as GenericInstanceMethod;

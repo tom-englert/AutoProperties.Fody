@@ -1,46 +1,62 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
+#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
+
+using System.Collections.Generic;
 using System.Linq;
 
 using AutoProperties.Fody;
 
+using JetBrains.Annotations;
+
 using Mono.Cecil;
-using Mono.Collections.Generic;
 
 internal static class ReferenceCleaner
 {
-    private static readonly HashSet<string> attributeNames = new HashSet<string>
+    [NotNull]
+    private static readonly HashSet<string> _attributeNames = new HashSet<string>
     {
         "AutoProperties.BypassAutoPropertySettersInConstructorsAttribute"
     };
 
-    private static void ProcessAssembly(ModuleDefinition moduleDefinition)
+    private static void ProcessAssembly([NotNull] ModuleDefinition moduleDefinition)
     {
+        // ReSharper disable once PossibleNullReferenceException
         foreach (var type in moduleDefinition.GetTypes())
         {
+            // ReSharper disable once AssignNullToNotNullAttribute
             ProcessType(type);
         }
 
-        RemoveAttributes(moduleDefinition.Assembly.CustomAttributes, attributeNames);
+        // ReSharper disable once PossibleNullReferenceException
+        // ReSharper disable once AssignNullToNotNullAttribute
+        RemoveAttributes(moduleDefinition.Assembly.CustomAttributes);
     }
 
-    private static void ProcessType(TypeDefinition type)
+    private static void ProcessType([NotNull] TypeDefinition type)
     {
-        RemoveAttributes(type.CustomAttributes, attributeNames);
+        // ReSharper disable once AssignNullToNotNullAttribute
+        RemoveAttributes(type.CustomAttributes);
 
+        // ReSharper disable once PossibleNullReferenceException
         foreach (var property in type.Properties)
         {
-            RemoveAttributes(property.CustomAttributes, attributeNames);
+            // ReSharper disable once PossibleNullReferenceException
+            // ReSharper disable once AssignNullToNotNullAttribute
+            RemoveAttributes(property.CustomAttributes);
         }
+        // ReSharper disable once PossibleNullReferenceException
         foreach (var field in type.Fields)
         {
-            RemoveAttributes(field.CustomAttributes, attributeNames);
+            // ReSharper disable once PossibleNullReferenceException
+            // ReSharper disable once AssignNullToNotNullAttribute
+            RemoveAttributes(field.CustomAttributes);
         }
     }
 
-    private static void RemoveAttributes(Collection<CustomAttribute> customAttributes, IEnumerable<string> attributeNames)
+    private static void RemoveAttributes([NotNull, ItemNotNull] ICollection<CustomAttribute> customAttributes)
     {
         var attributes = customAttributes
-            .Where(attribute => attributeNames.Contains(attribute.Constructor.DeclaringType.FullName))
+            .Where(attribute => _attributeNames.Contains(attribute.Constructor?.DeclaringType?.FullName))
             .ToArray();
 
         foreach (var customAttribute in attributes.ToList())
@@ -49,10 +65,12 @@ internal static class ReferenceCleaner
         }
     }
 
-    public static void RemoveReferences(this ModuleDefinition moduleDefinition, ILogger logger)
+    public static void RemoveReferences([NotNull] this ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
     {
         ProcessAssembly(moduleDefinition);
 
+        // ReSharper disable once AssignNullToNotNullAttribute
+        // ReSharper disable once PossibleNullReferenceException
         var referenceToRemove = moduleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "AutoProperties");
         if (referenceToRemove == null)
         {
