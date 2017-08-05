@@ -30,19 +30,19 @@ namespace AutoProperties.Fody
             return attributes.FirstOrDefault(attribute => attribute.Constructor?.DeclaringType?.FullName == attributeName);
         }
 
-        [ContractAnnotation("propertyName:notnull => true")]
-        public static bool IsPropertySetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
+        [ContractAnnotation("propertyName:null => false")]
+        public static bool IsPropertySetterCall([NotNull] this Instruction instruction, out string propertyName)
         {
             return IsPropertyCall(instruction, "set_", out propertyName);
         }
 
-        [ContractAnnotation("propertyName:notnull => true")]
+        [ContractAnnotation("propertyName:null => false")]
         public static bool IsPropertyGetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
         {
             return IsPropertyCall(instruction, "get_", out propertyName);
         }
 
-        [ContractAnnotation("propertyName:notnull => true")]
+        [ContractAnnotation("propertyName:null => false")]
         private static bool IsPropertyCall([NotNull] this Instruction instruction, [NotNull] string prefix, [CanBeNull] out string propertyName)
         {
             propertyName = null;
@@ -81,10 +81,10 @@ namespace AutoProperties.Fody
             return fields.FirstOrDefault(field => field.Name == $"<{propertyName}>k__BackingField");
         }
 
-        [ContractAnnotation("instruction:notnull => true")]
+        [ContractAnnotation("instruction:null => false")]
         public static bool IsExtensionMethodCall([CanBeNull] this Instruction instruction, [CanBeNull] string methodName)
-        { 
-        if (instruction?.OpCode.Code != Code.Call)
+        {
+            if (instruction?.OpCode.Code != Code.Call)
                 return false;
 
             var operand = instruction.Operand as GenericInstanceMethod;

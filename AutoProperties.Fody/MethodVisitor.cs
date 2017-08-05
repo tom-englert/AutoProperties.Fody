@@ -2,6 +2,7 @@
 #pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 using JetBrains.Annotations;
@@ -43,25 +44,33 @@ namespace AutoProperties.Fody
             var allClasses = allTypes
                 .Where(x => x != null && x.IsClass && (x.BaseType != null));
 
-            foreach (var classDefinition in allClasses)
+            try
             {
-                var shouldBypassAutoPropertySetters = classDefinition.ShouldBypassAutoPropertySettersInConstructors()
-                                                      ?? _moduleDefinition.Assembly.ShouldBypassAutoPropertySettersInConstructors()
-                                                      ?? false;
-
-                var autoPropertyToBackingFieldMap = new AutoPropertyToBackingFieldMap(classDefinition);
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                // ReSharper disable once PossibleNullReferenceException
-                var allMethods = classDefinition.Methods.Where(method => method.HasBody);
-
-                foreach (var method in allMethods)
+                foreach (var classDefinition in allClasses)
                 {
-                    if (method.IsConstructor && shouldBypassAutoPropertySetters)
-                        BypassAutoPropertySetters(method, autoPropertyToBackingFieldMap);
+                    var shouldBypassAutoPropertySetters = classDefinition.ShouldBypassAutoPropertySettersInConstructors()
+                                                          ?? _moduleDefinition.Assembly.ShouldBypassAutoPropertySettersInConstructors()
+                                                          ?? false;
 
-                    ProcessExtensionMethodCalls(method, autoPropertyToBackingFieldMap);
+                    var autoPropertyToBackingFieldMap = new AutoPropertyToBackingFieldMap(classDefinition);
+
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    // ReSharper disable once PossibleNullReferenceException
+                    var allMethods = classDefinition.Methods.Where(method => method.HasBody);
+
+                    foreach (var method in allMethods)
+                    {
+                        if (method.IsConstructor && shouldBypassAutoPropertySetters)
+                            BypassAutoPropertySetters(method, autoPropertyToBackingFieldMap);
+
+                        ProcessExtensionMethodCalls(method, autoPropertyToBackingFieldMap);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Unhandled exception. Weaving aborted. The most probable reason is that the module has no or incompatible debug information (.pdb)");
+                _logger.LogDebug(ex.ToString());
             }
         }
 
@@ -106,9 +115,8 @@ namespace AutoProperties.Fody
             private readonly MethodDefinition _method;
             [NotNull]
             private readonly AutoPropertyToBackingFieldMap _autoPropertyToBackingFieldMap;
-
-            [CanBeNull]
-            private readonly MethodDebugInformation _debugInformation;
+            [NotNull]
+            private readonly InstructionSequences _instructionSequences;
 
             public ExtensionMethodProcessor([NotNull] ILogger logger, [CanBeNull] ISymbolReader symbolReader, [NotNull] MethodDefinition method, [NotNull] AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
             {
@@ -116,76 +124,51 @@ namespace AutoProperties.Fody
                 _method = method;
                 _autoPropertyToBackingFieldMap = autoPropertyToBackingFieldMap;
 
-                _debugInformation = symbolReader?.Read(method);
+                Debug.Assert(method.Body?.Instructions != null, "method.Body.Instructions != null");
+
+                _instructionSequences = new InstructionSequences(method.Body.Instructions, symbolReader?.Read(method)?.SequencePoints);
             }
 
             public void ProcessExtensionMethodCalls([NotNull] string extensionMethodName, [NotNull] Func<AutoPropertyInfo, Instruction> createInstruction)
             {
-                // ReSharper disable once PossibleNullReferenceException
-                var instructions = _method.Body.Instructions;
-
-                // ReSharper disable once PossibleNullReferenceException
-                for (var index = 0; index < instructions.Count; index++)
+                foreach (var sequence in _instructionSequences)
                 {
-                    var instruction = instructions[index];
+                    Debug.Assert(sequence != null, "sequence != null");
+
+                    if (!ProcessSequence(sequence, extensionMethodName, createInstruction))
+                        return;
+                }
+            }
+
+            private bool ProcessSequence([NotNull] InstructionSequence sequence, [NotNull] string extensionMethodName, [NotNull] Func<AutoPropertyInfo, Instruction> createInstruction)
+            {
+                for (var index = 0; index < sequence.Count; index++)
+                {
+                    var instruction = sequence[index];
 
                     if (!instruction.IsExtensionMethodCall(extensionMethodName))
                         continue;
 
-                    if ((_debugInformation == null) || !(_debugInformation.HasSequencePoints))
-                    {
-                        _logger.LogError($"No debug information for method {_method} found. Can't weave this method.");
-                        return;
-                    }
-
-                    var sequencePoints = _debugInformation.SequencePoints;
-                    // ReSharper disable once AssignNullToNotNullAttribute
-                    // ReSharper disable once PossibleNullReferenceException
-                    var sequencePoint = sequencePoints.LastOrDefault(sp => sp.Offset <= instruction.Offset);
-                    // ReSharper disable once PossibleNullReferenceException
-                    var nextSequencePoint = sequencePoints.SkipWhile(sp => sp.Offset <= instruction.Offset).FirstOrDefault();
-                    if ((sequencePoint == null) || (nextSequencePoint == null))
-                    {
-                        _logger.LogError($"Incomplete debug information for method {_method}. Can't weave this method [1].");
-                        return;
-                    }
-
-                    // ReSharper disable once PossibleNullReferenceException
-                    var firstInstruction = instructions.SkipWhile(inst => inst.Offset < sequencePoint.Offset).FirstOrDefault();
-                    // ReSharper disable once PossibleNullReferenceException
-                    var lastInstruction = instructions.SkipWhile(inst => inst.Offset < nextSequencePoint.Offset).FirstOrDefault()?.Previous ?? instructions.Last();
-                    if ((firstInstruction == null) || (lastInstruction == null))
-                    {
-                        _logger.LogError($"Incomplete debug information for method {_method}. Can't weave this method [2].");
-                        return;
-                    }
-                    var secondInstruction = firstInstruction.Next;
-
-                    while (lastInstruction?.OpCode == OpCodes.Nop)
-                    {
-                        lastInstruction = lastInstruction?.Previous;
-                    }
-
-                    var propertyName = string.Empty;
-
-                    if ((firstInstruction.OpCode != OpCodes.Ldarg_0) 
-                        || (secondInstruction?.IsPropertyGetterCall(out propertyName) != true)
+                    if (sequence.Count < 4
+                        || sequence[0].OpCode != OpCodes.Ldarg_0
+                        || !sequence[1].IsPropertyGetterCall(out string propertyName)
+                        || sequence.Skip(index + 1).Any(inst => inst?.OpCode != OpCodes.Nop)
                         // ReSharper disable once AssignNullToNotNullAttribute
-                        || !_autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo)
-                        || (lastInstruction != instruction))
+                        || !_autoPropertyToBackingFieldMap.TryGetValue(propertyName, out var propertyInfo))
                     {
-                        // ReSharper disable once PossibleNullReferenceException
-                        var message = $"Invalid usage of extension method '{extensionMethodName}()': '{extensionMethodName}()' is only valid on auto-properties of class {_method.DeclaringType.Name}";
-                        _logger.LogError(message, sequencePoint);
-                        return;
+                        var message = $"Invalid usage of extension method '{extensionMethodName}()': '{extensionMethodName}()' is only valid on auto-properties of class {_method.DeclaringType?.Name}";
+                        _logger.LogError(message, sequence.Point);
+                        return false;
                     }
 
                     _logger.LogInfo($"Replace {extensionMethodName}() on property {propertyName} in method {_method}.");
 
-                    instructions[index] = createInstruction(propertyInfo);
-                    instructions.Remove(secondInstruction);
-                    index -= 1;
+                    sequence[index] = createInstruction(propertyInfo);
+                    sequence.RemoveAt(1);
+                    return true;
                 }
+
+                return true;
             }
         }
     }

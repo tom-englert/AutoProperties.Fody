@@ -74,6 +74,8 @@
       <Link>Version.cs</Link>
     </Compile>
     <Compile Include="ILogger.cs" />
+    <Compile Include="InstructionSequence.cs" />
+    <Compile Include="InstructionSequences.cs" />
     <Compile Include="MethodVisitor.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AutoPropertyToBackingFieldMap.cs" />
