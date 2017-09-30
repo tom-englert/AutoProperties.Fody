@@ -25,7 +25,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
-    <CodeAnalysisIgnoreGeneratedCode>true</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -79,7 +78,7 @@
     <Compile Include="ILogger.cs" />
     <Compile Include="InstructionSequence.cs" />
     <Compile Include="InstructionSequences.cs" />
-    <Compile Include="MethodVisitor.cs" />
+    <Compile Include="BackingFieldAccessWeaver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AutoPropertyToBackingFieldMap.cs" />
     <Compile Include="ReferenceCleaner.cs" />

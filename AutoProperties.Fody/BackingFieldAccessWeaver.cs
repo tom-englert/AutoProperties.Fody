@@ -9,15 +9,15 @@ using Mono.Cecil.Cil;
 
 namespace AutoProperties.Fody
 {
-    internal static class MethodVisitorExtensions
+    internal static class BackingFieldAccessWeaverExtensions
     {
-        internal static void VisitAllMethods([NotNull] this ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
+        internal static void WeaveBackingFields([NotNull] this ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
         {
-            new MethodVisitor(moduleDefinition, logger).VisitAllMethods();
+            new BackingFieldAccessWeaver(moduleDefinition, logger).Weave();
         }
     }
 
-    internal class MethodVisitor
+    internal class BackingFieldAccessWeaver
     {
         [NotNull]
         private readonly ModuleDefinition _moduleDefinition;
@@ -26,14 +26,14 @@ namespace AutoProperties.Fody
         [CanBeNull]
         private readonly ISymbolReader _symbolReader;
 
-        public MethodVisitor([NotNull] ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
+        public BackingFieldAccessWeaver([NotNull] ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
         {
             _logger = logger;
             _moduleDefinition = moduleDefinition;
             _symbolReader = moduleDefinition.SymbolReader;
         }
 
-        internal void VisitAllMethods()
+        internal void Weave()
         {
             var allTypes = _moduleDefinition.GetTypes();
 

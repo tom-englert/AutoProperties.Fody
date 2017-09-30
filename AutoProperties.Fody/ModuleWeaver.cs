@@ -41,7 +41,7 @@ public class ModuleWeaver : ILogger
 
     public void Execute()
     {
-        ModuleDefinition.VisitAllMethods(this);
+        ModuleDefinition.WeaveBackingFields(this);
 
         if (!_hasErrors)
             ModuleDefinition.RemoveReferences(this);
