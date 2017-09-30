@@ -1,7 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using JetBrains.Annotations;
@@ -44,17 +41,25 @@ namespace AutoProperties.Fody
         [NotNull]
         private static IDictionary<string, AutoPropertyInfo> CreateMap([NotNull, ItemNotNull] ICollection<PropertyDefinition> properties, [NotNull, ItemNotNull] ICollection<FieldDefinition> fields)
         {
-            return properties.Select(property => new AutoPropertyInfo {Property = property, BackingField = property.FindAutoPropertyBackingField(fields)})
+            return properties.Select(property => new { Property = property, BackingField = property.FindAutoPropertyBackingField(fields) })
                 .Where(item => item.BackingField != null)
-                // ReSharper disable once PossibleNullReferenceException
+                .Select(item => new AutoPropertyInfo(item.BackingField, item.Property))
                 .ToDictionary(item => item.Property.Name);
         }
     }
 
     internal class AutoPropertyInfo
     {
-        public FieldDefinition BackingField { get; set; }
+        public AutoPropertyInfo([NotNull] FieldDefinition backingField, [NotNull] PropertyDefinition property)
+        {
+            BackingField = backingField;
+            Property = property;
+        }
 
-        public PropertyDefinition Property { get; set; }
+        [NotNull]
+        public FieldDefinition BackingField { get; }
+
+        [NotNull]
+        public PropertyDefinition Property { get; }
     }
 }

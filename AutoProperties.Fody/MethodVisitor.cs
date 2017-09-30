@@ -1,7 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 
@@ -26,7 +23,7 @@ namespace AutoProperties.Fody
         private readonly ModuleDefinition _moduleDefinition;
         [NotNull]
         private readonly ILogger _logger;
-
+        [CanBeNull]
         private readonly ISymbolReader _symbolReader;
 
         public MethodVisitor([NotNull] ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
@@ -115,7 +112,7 @@ namespace AutoProperties.Fody
             private readonly MethodDefinition _method;
             [NotNull]
             private readonly AutoPropertyToBackingFieldMap _autoPropertyToBackingFieldMap;
-            [NotNull]
+            [NotNull, ItemNotNull]
             private readonly InstructionSequences _instructionSequences;
 
             public ExtensionMethodProcessor([NotNull] ILogger logger, [CanBeNull] ISymbolReader symbolReader, [NotNull] MethodDefinition method, [NotNull] AutoPropertyToBackingFieldMap autoPropertyToBackingFieldMap)
@@ -140,7 +137,7 @@ namespace AutoProperties.Fody
                 }
             }
 
-            private bool ProcessSequence([NotNull] InstructionSequence sequence, [NotNull] string extensionMethodName, [NotNull] Func<AutoPropertyInfo, Instruction> createInstruction)
+            private bool ProcessSequence([NotNull, ItemNotNull] InstructionSequence sequence, [NotNull] string extensionMethodName, [NotNull] Func<AutoPropertyInfo, Instruction> createInstruction)
             {
                 for (var index = 0; index < sequence.Count; index++)
                 {
@@ -163,6 +160,7 @@ namespace AutoProperties.Fody
 
                     _logger.LogInfo($"Replace {extensionMethodName}() on property {propertyName} in method {_method}.");
 
+                    // ReSharper disable once AssignNullToNotNullAttribute
                     sequence[index] = createInstruction(propertyInfo);
                     sequence.RemoveAt(1);
                     return true;

@@ -1,12 +1,14 @@
-﻿using Mono.Cecil.Cil;
+﻿using JetBrains.Annotations;
+
+using Mono.Cecil.Cil;
 
 namespace AutoProperties.Fody
 {
     internal interface ILogger
     {
-        void LogDebug(string message);
-        void LogInfo(string message);
-        void LogWarning(string message);
-        void LogError(string message, SequencePoint sequencePoint = null);
+        void LogDebug([CanBeNull] string message);
+        void LogInfo([CanBeNull] string message);
+        void LogWarning([CanBeNull] string message);
+        void LogError([CanBeNull] string message, [CanBeNull] SequencePoint sequencePoint = null);
     }
 }

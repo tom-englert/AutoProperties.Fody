@@ -1,7 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;

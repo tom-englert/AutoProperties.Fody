@@ -1,7 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -14,7 +11,7 @@ using NUnit.Framework;
 
 using Tests;
 
-public class PropertiesTests
+public class AccessBackingFieldTests
 {
     [NotNull]
     private readonly Assembly assembly = WeaverHelper.Create().Assembly;
@@ -59,7 +56,7 @@ public class PropertiesTests
     [TestCase("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySettersAndExplicitSetProperty1",
         "Test", "Test2", true, new[] { "IsChanged", "Property1" })]
 
-    public void Test([NotNull] string className, [CanBeNull] string property1Value, [CanBeNull] string property2Value, bool isChangedStateAfterConstructor, [NotNull] string[] expectedPropertyChangedCallsInConstructor)
+    public void Test([NotNull] string className, [CanBeNull] string property1Value, [CanBeNull] string property2Value, bool isChangedStateAfterConstructor, [NotNull, ItemNotNull] string[] expectedPropertyChangedCallsInConstructor)
     {
         var instance = assembly.GetInstance(className);
 

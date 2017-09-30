@@ -49,8 +49,7 @@
     <Compile Include="..\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
-    <Compile Include="BackingFieldAccessExtensions.cs" />
-    <Compile Include="BypassAutoPropertySettersInConstructorsAttribute.cs" />
+    <Compile Include="*.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

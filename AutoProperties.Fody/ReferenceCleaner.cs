@@ -1,7 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using AutoProperties.Fody;
@@ -12,7 +9,7 @@ using Mono.Cecil;
 
 internal static class ReferenceCleaner
 {
-    [NotNull]
+    [NotNull, ItemNotNull]
     private static readonly HashSet<string> _attributeNames = new HashSet<string>
     {
         "AutoProperties.BypassAutoPropertySettersInConstructorsAttribute"

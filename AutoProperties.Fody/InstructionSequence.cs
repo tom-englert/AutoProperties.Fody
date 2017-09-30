@@ -1,5 +1,3 @@
-#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
 // ReSharper disable AnnotateCanBeNullParameter
 
 using System;
@@ -20,10 +18,10 @@ namespace AutoProperties.Fody
     {
         [NotNull, ItemNotNull]
         private readonly IList<Instruction> _instructions;
-        [CanBeNull]
+        [CanBeNull,ItemNotNull]
         private readonly InstructionSequence _previous;
 
-        public InstructionSequence([NotNull, ItemNotNull] IList<Instruction> instructions, [CanBeNull] InstructionSequence previous, int count, [CanBeNull] SequencePoint point)
+        public InstructionSequence([NotNull, ItemNotNull] IList<Instruction> instructions, [CanBeNull, ItemNotNull] InstructionSequence previous, int count, [CanBeNull] SequencePoint point)
         {
             _instructions = instructions;
             _previous = previous;

@@ -1,6 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,7 +29,7 @@ namespace AutoProperties.Fody
         }
 
         [ContractAnnotation("propertyName:null => false")]
-        public static bool IsPropertySetterCall([NotNull] this Instruction instruction, out string propertyName)
+        public static bool IsPropertySetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
         {
             return IsPropertyCall(instruction, "set_", out propertyName);
         }
@@ -64,7 +62,7 @@ namespace AutoProperties.Fody
             }
 
             var operandName = operand.Name;
-            if (operandName?.StartsWith(prefix) != true)
+            if (operandName?.StartsWith(prefix, StringComparison.Ordinal) != true)
             {
                 return false;
             }

@@ -1,7 +1,4 @@
-﻿#pragma warning disable CCRSI_ContractForNotNull // Element with [NotNull] attribute does not have a corresponding not-null contract.
-#pragma warning disable CCRSI_CreateContractInvariantMethod // Missing Contract Invariant Method.
-
-using System;
+﻿using System;
 using System.Reflection;
 
 using JetBrains.Annotations;
@@ -11,7 +8,7 @@ namespace Tests
     public static class ExtensionMethods
     {
         [NotNull]
-        public static dynamic GetInstance([NotNull] this Assembly assembly, [NotNull] string className, [NotNull] params object[] args)
+        public static dynamic GetInstance([NotNull] this Assembly assembly, [NotNull] string className, [NotNull, ItemNotNull] params object[] args)
         {
             var type = assembly.GetType(className, true);
 
