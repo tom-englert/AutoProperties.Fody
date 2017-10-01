@@ -1,3 +1,6 @@
+**1.3.0.0**
+- Fix possible exception in SetBackingField for empty properties.
+
 **1.2.0.0**
 - Add auto-property interceptor
 
