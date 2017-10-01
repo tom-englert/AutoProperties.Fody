@@ -149,5 +149,9 @@ namespace AutoProperties.Fody
             }
         }
 
+        public static bool AccessesMember([NotNull] this MethodDefinition method, [NotNull] IMemberDefinition member)
+        {
+            return method.Body?.Instructions?.Any(inst => inst?.Operand == member) ?? false;
+        }
     }
 }

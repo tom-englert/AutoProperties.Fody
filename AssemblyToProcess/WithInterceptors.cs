@@ -127,14 +127,26 @@ public class BaseWithPrivateInterceptors
 
 public class DerivedFromBaseWithPrivateInterceptors : BaseWithPrivateInterceptors
 {
-    public int Property1 { get; set; } = 7;
+    public DerivedFromBaseWithPrivateInterceptors()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
 
-    public string Property2 { get; set; } = "8";
+    public int Property1 { get; set; }
+
+    public string Property2 { get; set; }
 }
 
 public class ClassWithDoubleInterceptors
 {
     private int _field = 42;
+
+    public ClassWithDoubleInterceptors()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
 
     [GetInterceptor]
     private object GetInterceptor(string propertyName, Type propertyType)
@@ -154,14 +166,20 @@ public class ClassWithDoubleInterceptors
         _field = Convert.ToInt32(value);
     }
 
-    public int Property1 { get; set; } = 7;
+    public int Property1 { get; set; }
 
-    public string Property2 { get; set; } = "8";
+    public string Property2 { get; set; }
 }
 
 public class ClassWithMissingGetInterceptor
 {
     private int _field = 42;
+
+    public ClassWithMissingGetInterceptor()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
 
     [SetInterceptor]
     private void SetInterceptor(object value, string propertyName)
@@ -169,14 +187,20 @@ public class ClassWithMissingGetInterceptor
         _field = Convert.ToInt32(value);
     }
 
-    public int Property1 { get; set; } = 7;
+    public int Property1 { get; set; }
 
-    public string Property2 { get; set; } = "8";
+    public string Property2 { get; set; }
 }
 
 public class ClassWithBadGenericInterceptors
 {
     private int _field = 42;
+
+    public ClassWithBadGenericInterceptors()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
 
     [GetInterceptor]
     private T GetInterceptor<T, T1>(string propertyName, T1 invalid)
@@ -190,9 +214,9 @@ public class ClassWithBadGenericInterceptors
         _field = Convert.ToInt32(value);
     }
 
-    public int Property1 { get; set; } = 7;
+    public int Property1 { get; set; }
 
-    public string Property2 { get; set; } = "8";
+    public string Property2 { get; set; }
 }
 
 
@@ -200,8 +224,35 @@ public class ClassWithUnsupportedParameter
 {
     private int _field = 42;
 
+    public ClassWithUnsupportedParameter()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
+
     [GetInterceptor]
     private object GetInterceptor(string propertyName, Type propertyType, int invalid)
+    {
+        return Convert.ChangeType(_field, propertyType);
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+    }
+
+    public int Property1 { get; set; }
+
+    public string Property2 { get; set; }
+}
+
+public class ClassWithInterceptorAndInitializedAutoProperties
+{
+    private int _field = 42;
+
+    [GetInterceptor]
+    private object GetInterceptor(string propertyName, Type propertyType)
     {
         return Convert.ChangeType(_field, propertyType);
     }

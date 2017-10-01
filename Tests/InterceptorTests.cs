@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 
 using JetBrains.Annotations;
 
@@ -46,6 +45,7 @@ public class InterceptorTests
     [TestCase("ClassWithMissingGetInterceptor", 3)]
     [TestCase("ClassWithBadGenericInterceptors", 3)]
     [TestCase("ClassWithUnsupportedParameter", 3)]
+    [TestCase("ClassWithInterceptorAndInitializedAutoProperties", 3)]
     public void BadImplementationInterceptorTest([NotNull] string className, int expectedNumberOfFields)
     {
         var target = assembly.GetInstance(className);

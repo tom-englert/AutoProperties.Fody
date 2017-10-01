@@ -160,7 +160,10 @@ namespace AutoProperties.Fody
             {
                 foreach (var property in _classDefinition.Properties)
                 {
-                    new PropertyWeaver(this, property).Weave(interceptors);
+                    if (property.CustomAttributes.GetAttribute("AutoProperties.InterceptIgnoreAttribute") != null)
+                        continue;
+
+                    new PropertyWeaver(this, property).Execute(interceptors);
                 }
             }
 
@@ -183,7 +186,7 @@ namespace AutoProperties.Fody
                     _moduleDefinition = _classWeaver._weaver._moduleDefinition;
                 }
 
-                public void Weave([NotNull] Interceptors interceptors)
+                public void Execute([NotNull] Interceptors interceptors)
                 {
                     var classDefinition = _classWeaver._classDefinition;
 
@@ -191,6 +194,14 @@ namespace AutoProperties.Fody
                     var backingField = _property.FindAutoPropertyBackingField(classDefinition.Fields);
                     if (backingField == null)
                         return;
+
+                    foreach (var ctor in classDefinition.GetConstructors())
+                    {
+                        if (ctor.AccessesMember(backingField))
+                        {
+                            throw new WeavingException($"The auto-property {_property} is initialized and cannot be intercepted.", _property.GetMethod ?? _property.SetMethod);
+                        }
+                    }
 
                     InjectGetInterceptor(backingField, interceptors.GetInterceptor);
                     InjectSetInterceptor(backingField, interceptors.SetInterceptor);
