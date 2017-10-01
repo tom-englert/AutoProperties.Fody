@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -14,6 +15,15 @@ public class WeaverTests
 {
     [NotNull]
     private readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
+
+    [Test]
+    public void OutputWeaverMessages()
+    {
+        foreach (var message in _weaverHelper.Messages)
+        {
+            TestContext.Out.WriteLine(message);
+        }
+    }
 
     [Test]
     [SuppressMessage("ReSharper", "PossibleNullReferenceException")]

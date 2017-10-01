@@ -57,7 +57,7 @@
     <Compile Include="ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign.cs" />
     <Compile Include="ClassWithExplicitInitializedBackingFieldProperties.cs" />
     <Compile Include="ClassWithInlineInitializedAutoProperties.cs" />
-    <Compile Include="ClassWithSimpleInterceptor.cs" />
+    <Compile Include="WithInterceptors.cs" />
     <Compile Include="ImplementsPropertyChanged.cs" />
   </ItemGroup>
   <ItemGroup>

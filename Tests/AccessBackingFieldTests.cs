@@ -22,8 +22,6 @@ public class AccessBackingFieldTests
         "Test", "Test2", false, new string[0])]
     [TestCase("ClassWithExplicitInitializedAutoProperties", 
         "Test", "Test2", true, new[]{ "IsChanged", "Property1", "Property2" })]
-    //[TestCase("DerivedClassWithExplicitInitializedAutoProperties",
-    //    "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
     [TestCase("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign", 
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2", "Property1", "Property2", "Property3" })]
     [TestCase("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign", 

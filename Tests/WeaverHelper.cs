@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 using JetBrains.Annotations;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
 
 using NUnit.Framework;
 
@@ -25,6 +27,8 @@ namespace Tests
         public string NewAssemblyPath { get; }
         [NotNull]
         public string OriginalAssemblyPath { get; }
+        [NotNull, ItemNotNull]
+        public IList<string> Messages { get; } = new List<string>();
 
 #if (!DEBUG)
         private const string Configuration = "Release";
@@ -66,6 +70,9 @@ namespace Tests
                     AssemblyResolver = moduleDefinition.AssemblyResolver
                 };
 
+                weavingTask.LogErrorPoint += WeavingTask_LogErrorPoint;
+                weavingTask.LogError += WeavingTask_LogError;
+
                 weavingTask.Execute();
 
                 var assemblyNameDefinition = moduleDefinition.Assembly?.Name;
@@ -78,6 +85,21 @@ namespace Tests
 
             // ReSharper disable once AssignNullToNotNullAttribute
             Assembly = Assembly.LoadFile(NewAssemblyPath);
+        }
+
+        private void WeavingTask_LogError([NotNull] string message)
+        {
+            Messages.Add(message);
+        }
+
+        private void WeavingTask_LogErrorPoint([NotNull] string message, [CanBeNull] SequencePoint sequencePoint)
+        {
+            if (sequencePoint != null)
+            {
+                message = message + $"\r\n\t({sequencePoint.Document.Url}@{sequencePoint.StartLine}:{sequencePoint.StartColumn}\r\n\t => {File.ReadAllLines(sequencePoint.Document.Url).Skip(sequencePoint.StartLine - 1).FirstOrDefault()}";
+            }
+
+            Messages.Add(message);
         }
     }
 }
