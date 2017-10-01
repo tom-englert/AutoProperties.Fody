@@ -268,3 +268,25 @@ public class ClassWithInterceptorAndInitializedAutoProperties
     public string Property2 { get; set; } = "8";
 }
 
+public class ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties
+{
+    private int _field = 42;
+
+    [GetInterceptor]
+    private object GetInterceptor(string propertyName, Type propertyType)
+    {
+        return Convert.ChangeType(_field, propertyType);
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+    }
+
+    [InterceptIgnore]
+    public int Property1 { get; set; } = 7;
+
+    [InterceptIgnore]
+    public string Property2 { get; set; } = "8";
+}

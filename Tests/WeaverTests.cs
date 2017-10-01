@@ -23,6 +23,8 @@ public class WeaverTests
         {
             TestContext.Out.WriteLine(message);
         }
+
+        Assert.AreEqual(6, _weaverHelper.Messages.Count);
     }
 
     [Test]
