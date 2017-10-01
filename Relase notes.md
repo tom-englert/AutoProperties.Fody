@@ -1,3 +1,6 @@
+**1.2.0.0**
+- Add auto-property interceptor
+
 **1.1.0.0**
 - Fix #1: Handle complex parameters
 
