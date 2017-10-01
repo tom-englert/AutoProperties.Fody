@@ -18,6 +18,8 @@ public class InterceptorTests
     [TestCase("ClassWithExternalInterceptorsBase", 0)]
     [TestCase("ClassWithExternalGenericInterceptorsBase", 0)]
     [TestCase("ClassWithInterceptorsUsingAllPossibleParameters", 3)]
+    [TestCase("ClassWithReadonlyProperty", 1)]
+    [TestCase("ClassDerivedFromClassWithAbstractProperty", 0)]
     public void SimpleInterceptorTest([NotNull] string className, int expectedNumberOfFields)
     {
         var target = assembly.GetInstance(className);

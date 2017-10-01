@@ -22,7 +22,7 @@ namespace AutoProperties.Fody
         [NotNull, ItemNotNull]
         private static IEnumerable<InstructionSequence> CreateSequences([NotNull, ItemNotNull] IList<Instruction> instructions, [CanBeNull, ItemNotNull] IList<SequencePoint> sequencePoints)
         {
-            if (sequencePoints == null)
+            if (sequencePoints?.Any() != true)
             {
                 yield return new InstructionSequence(instructions, null, instructions.Count, null);
                 yield break;

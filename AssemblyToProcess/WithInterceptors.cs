@@ -31,6 +31,57 @@ public class ClassWithSimpleInterceptors
     public string Property2 { get; set; }
 }
 
+public class ClassWithReadonlyProperty
+{
+    private int _field = 42;
+
+    [GetInterceptor]
+    private object GetInterceptor(string propertyName, Type propertyType)
+    {
+        return Convert.ChangeType(_field, propertyType);
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+    }
+
+    public int Property1 { get; set; }
+
+    public string Property2 { get; set; }
+
+    public string Property3 { get; }
+}
+
+public abstract class ClassWithAbstractProperty
+{
+    private int _field = 42;
+
+    [GetInterceptor]
+    protected object GetInterceptor(string propertyName, Type propertyType)
+    {
+        return Convert.ChangeType(_field, propertyType);
+    }
+
+    [SetInterceptor]
+    protected void SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+    }
+
+    public abstract int Property1 { get; set; }
+
+    public abstract string Property2 { get; set; }
+}
+
+public class ClassDerivedFromClassWithAbstractProperty : ClassWithAbstractProperty
+{
+    public override int Property1 { get; set; }
+
+    public override string Property2 { get; set; }
+}
+
 public class ClassWithGenericInterceptors
 {
     private int _field = 42;
