@@ -48,20 +48,16 @@
       <HintPath>..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\FodyCecil.2.0.0\lib\net40\Mono.Cecil.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FodyCecil.2.1.0\lib\net40\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\FodyCecil.2.0.0\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FodyCecil.2.1.0\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\FodyCecil.2.0.0\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FodyCecil.2.1.0\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Rocks, Version=0.10.0.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\FodyCecil.2.0.0\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\FodyCecil.2.1.0\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -81,9 +77,13 @@
     <Compile Include="BackingFieldAccessWeaver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AutoPropertyToBackingFieldMap.cs" />
+    <Compile Include="PropertyAccessorWeaver.cs" />
     <Compile Include="ReferenceCleaner.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ModuleWeaver.cs" />
+    <Compile Include="SystemReferences.cs" />
+    <Compile Include="TypeReferenceEqualityComparer.cs" />
+    <Compile Include="WeavingException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\AutoProperties.Fody.ruleset">

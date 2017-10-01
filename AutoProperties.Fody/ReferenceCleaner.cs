@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// ReSharper disable PossibleNullReferenceException
+// ReSharper disable AssignNullToNotNullAttribute
+
+using System.Collections.Generic;
 using System.Linq;
 
 using AutoProperties.Fody;
@@ -12,41 +15,40 @@ internal static class ReferenceCleaner
     [NotNull, ItemNotNull]
     private static readonly HashSet<string> _attributeNames = new HashSet<string>
     {
-        "AutoProperties.BypassAutoPropertySettersInConstructorsAttribute"
+        "AutoProperties.BypassAutoPropertySettersInConstructorsAttribute",
+        "AutoProperties.GetInterceptorAttribute",
+        "AutoProperties.SetInterceptorAttribute",
+        "AutoProperties.InterceptIgnoreAttribute"
     };
 
     private static void ProcessAssembly([NotNull] ModuleDefinition moduleDefinition)
     {
-        // ReSharper disable once PossibleNullReferenceException
         foreach (var type in moduleDefinition.GetTypes())
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
             ProcessType(type);
         }
 
-        // ReSharper disable once PossibleNullReferenceException
-        // ReSharper disable once AssignNullToNotNullAttribute
+        RemoveAttributes(moduleDefinition.CustomAttributes);
         RemoveAttributes(moduleDefinition.Assembly.CustomAttributes);
     }
 
     private static void ProcessType([NotNull] TypeDefinition type)
     {
-        // ReSharper disable once AssignNullToNotNullAttribute
         RemoveAttributes(type.CustomAttributes);
 
-        // ReSharper disable once PossibleNullReferenceException
         foreach (var property in type.Properties)
         {
-            // ReSharper disable once PossibleNullReferenceException
-            // ReSharper disable once AssignNullToNotNullAttribute
             RemoveAttributes(property.CustomAttributes);
         }
-        // ReSharper disable once PossibleNullReferenceException
+
         foreach (var field in type.Fields)
         {
-            // ReSharper disable once PossibleNullReferenceException
-            // ReSharper disable once AssignNullToNotNullAttribute
             RemoveAttributes(field.CustomAttributes);
+        }
+
+        foreach (var method in type.Methods)
+        {
+            RemoveAttributes(method.CustomAttributes);
         }
     }
 
@@ -66,8 +68,6 @@ internal static class ReferenceCleaner
     {
         ProcessAssembly(moduleDefinition);
 
-        // ReSharper disable once AssignNullToNotNullAttribute
-        // ReSharper disable once PossibleNullReferenceException
         var referenceToRemove = moduleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "AutoProperties");
         if (referenceToRemove == null)
         {

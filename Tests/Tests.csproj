@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="AccessBackingFieldTests.cs" />
+    <Compile Include="InterceptorTests.cs" />
     <Compile Include="Verifier.cs" />
     <Compile Include="WeaverHelper.cs" />
     <Compile Include="WeaverTests.cs" />

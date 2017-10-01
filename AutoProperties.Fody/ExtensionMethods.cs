@@ -23,9 +23,18 @@ namespace AutoProperties.Fody
         }
 
         [CanBeNull]
-        private static CustomAttribute GetAttribute([NotNull, ItemNotNull] this IEnumerable<CustomAttribute> attributes, [CanBeNull] string attributeName)
+        public static CustomAttribute GetAttribute([NotNull, ItemNotNull] this IEnumerable<CustomAttribute> attributes, [CanBeNull] string attributeName)
         {
             return attributes.FirstOrDefault(attribute => attribute.Constructor?.DeclaringType?.FullName == attributeName);
+        }
+
+        [CanBeNull]
+        public static SequencePoint GetEntryPoint([CanBeNull] this MethodDefinition method, [CanBeNull] ISymbolReader symbolReader)
+        {
+            if (method == null)
+                return null;
+
+            return symbolReader?.Read(method)?.SequencePoints?.FirstOrDefault();
         }
 
         [ContractAnnotation("propertyName:null => false")]
@@ -97,5 +106,48 @@ namespace AutoProperties.Fody
 
             return true;
         }
+
+        [CanBeNull]
+        public static MethodDefinition WhenAccessibleInDerivedClass([CanBeNull] this MethodDefinition baseMethodDefinition)
+        {
+            return baseMethodDefinition?.IsPrivate != false ? null : baseMethodDefinition;
+        }
+
+        [NotNull, ItemNotNull]
+        public static IEnumerable<TypeDefinition> GetSelfAndBaseTypes([NotNull] this TypeDefinition type)
+        {
+            yield return type;
+
+            while ((type = type.BaseType?.Resolve()) != null)
+            {
+                yield return type;
+            }
+        }
+
+        [CanBeNull]
+        public static TValue GetValueOrDefault<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> dictionary, [CanBeNull] TKey key)
+        {
+            if (ReferenceEquals(key, null))
+                return default(TValue);
+
+            return dictionary.TryGetValue(key, out var value) ? value : default(TValue);
+        }
+
+        public static void AddRange<T>([NotNull, ItemCanBeNull] this IList<T> collection, [NotNull, ItemCanBeNull] params T[] values)
+        {
+            foreach (var value in values)
+            {
+                collection.Add(value);
+            }
+        }
+
+        public static void InsertRange<T>([NotNull, ItemCanBeNull] this IList<T> collection, int index, [NotNull, ItemCanBeNull] params T[] values)
+        {
+            foreach (var value in values)
+            {
+                collection.Insert(index++, value);
+            }
+        }
+
     }
 }

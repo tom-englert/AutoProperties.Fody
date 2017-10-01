@@ -1,19 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{270EBFBC-0421-4522-AA40-84D66238A19F}</ProjectGuid>
+    <ProjectGuid>{B6015810-8557-4176-B8C6-615E3951E68A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AssemblyToProcess</RootNamespace>
-    <AssemblyName>AssemblyToProcess</AssemblyName>
+    <RootNamespace>TestLibrary</RootNamespace>
+    <AssemblyName>TestLibrary</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,8 +22,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,8 +30,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PropertyChanged, Version=2.1.4.0, Culture=neutral, PublicKeyToken=ee3ee20bcf148ddd, processorArchitecture=MSIL">
@@ -47,37 +42,18 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="ClassWithAutoPropertiesInitializedInSeparateMethod.cs" />
-    <Compile Include="ClassWithExplicitInitializedAutoProperties.cs" />
-    <Compile Include="ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign.cs" />
-    <Compile Include="ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign.cs" />
-    <Compile Include="ClassWithExplicitInitializedBackingFieldProperties.cs" />
-    <Compile Include="ClassWithInlineInitializedAutoProperties.cs" />
-    <Compile Include="ClassWithSimpleInterceptor.cs" />
-    <Compile Include="ImplementsPropertyChanged.cs" />
+    <Compile Include="ObservableObject.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\AutoProperties.Test.ruleset">
-      <Link>AutoProperties.Test.ruleset</Link>
-    </None>
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AutoProperties\AutoProperties.csproj">
-      <Project>{88856d9c-8c44-4f9c-8b3d-6c29ccc7b08e}</Project>
-      <Name>AutoProperties</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TestLibrary\TestLibrary.csproj">
-      <Project>{b6015810-8557-4176-b8c6-615e3951e68a}</Project>
-      <Name>TestLibrary</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.2.0.0\build\dotnet\Fody.targets" Condition="Exists('..\packages\Fody.2.0.0\build\dotnet\Fody.targets')" />

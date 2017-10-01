@@ -1,0 +1,332 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+
+using JetBrains.Annotations;
+
+using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
+
+namespace AutoProperties.Fody
+{
+    internal class PropertyAccessorWeaver
+    {
+        [NotNull] private readonly ModuleDefinition _moduleDefinition;
+        [NotNull] private readonly SystemReferences _systemReferences;
+        [NotNull] private readonly ILogger _logger;
+
+        public PropertyAccessorWeaver([NotNull] ModuleWeaver moduleWeaver)
+        {
+            _logger = moduleWeaver;
+            _moduleDefinition = moduleWeaver.ModuleDefinition;
+            _systemReferences = moduleWeaver.SystemReferences;
+        }
+
+        public void Execute()
+        {
+            try
+            {
+                var allTypes = _moduleDefinition.GetTypes();
+
+                // ReSharper disable once AssignNullToNotNullAttribute
+                var allClasses = allTypes
+                    .Where(type => type != null && type.IsClass && (type.BaseType != null));
+
+                var allInterceptors = new Dictionary<TypeReference, Interceptors>(TypeReferenceEqualityComparer.Default);
+
+                foreach (var classDefinition in allClasses.SelectMany(item => item.GetSelfAndBaseTypes().Reverse()))
+                {
+                    Debug.Assert(classDefinition != null, nameof(classDefinition) + " != null");
+
+                    if (allInterceptors.ContainsKey(classDefinition))
+                        continue;
+
+                    allInterceptors.Add(classDefinition, new Interceptors(this, classDefinition, allInterceptors.GetValueOrDefault(classDefinition.BaseType)));
+                }
+
+                // ReSharper disable once PossibleNullReferenceException
+                foreach (var interceptors in allInterceptors.Values.Where(item => item.HasValues))
+                {
+                    interceptors.Execute();
+                }
+            }
+            catch (WeavingException ex)
+            {
+                _logger.LogError(ex.Message, ex.Method);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Unhandled exception. Weaving aborted.");
+                _logger.LogDebug(ex.ToString());
+            }
+        }
+
+        [CanBeNull]
+        private TypeDefinition ImportAndResolve([CanBeNull] TypeReference type) => type == null ? null : _moduleDefinition.ImportReference(type)?.Resolve();
+
+        private class Interceptors
+        {
+            [NotNull] private readonly TypeDefinition _classDefinition;
+            [NotNull] private readonly PropertyAccessorWeaver _weaver;
+
+            [CanBeNull] private readonly Interceptors _baseTypeInterceptors;
+            [CanBeNull] private readonly MethodDefinition _setInterceptor;
+            [CanBeNull] private readonly MethodDefinition _getInterceptor;
+
+            public Interceptors([NotNull] PropertyAccessorWeaver weaver, [NotNull] TypeDefinition classDefinition, [CanBeNull] Interceptors baseTypeInterceptors)
+            {
+                _weaver = weaver;
+                _classDefinition = classDefinition;
+                _baseTypeInterceptors = baseTypeInterceptors;
+
+                var allMethods = weaver.ImportAndResolve(classDefinition)?.Methods;
+                if (allMethods == null)
+                    return;
+
+                var getInterceptors = allMethods.Where(m => m?.CustomAttributes?.GetAttribute("AutoProperties.GetInterceptorAttribute") != null).ToArray();
+                if (getInterceptors.Length > 1)
+                    throw new WeavingException($"Multiple [GetInterceptor] attributed methods found in class {classDefinition}", getInterceptors[1]);
+
+                _getInterceptor = getInterceptors.FirstOrDefault();
+
+                var setInterceptors = allMethods.Where(m => m?.CustomAttributes?.GetAttribute("AutoProperties.SetInterceptorAttribute") != null).ToArray();
+                if (setInterceptors.Length > 1)
+                    throw new WeavingException($"Multiple [SetInterceptor] attributed methods found in class {classDefinition}", setInterceptors[1]);
+
+                _setInterceptor = setInterceptors.FirstOrDefault();
+            }
+
+            [CanBeNull]
+            public MethodDefinition SetInterceptor => _setInterceptor ?? _baseTypeInterceptors?.SetInterceptor.WhenAccessibleInDerivedClass();
+
+            [CanBeNull]
+            public MethodDefinition GetInterceptor => _getInterceptor ?? _baseTypeInterceptors?.GetInterceptor.WhenAccessibleInDerivedClass();
+
+            public bool HasValues => GetInterceptor != null || SetInterceptor != null;
+
+            public void Execute()
+            {
+                new ClassWeaver(_weaver, _classDefinition).Execute(this);
+            }
+        }
+
+        private class ClassWeaver
+        {
+            [NotNull] private readonly PropertyAccessorWeaver _weaver;
+            [NotNull] private readonly TypeDefinition _classDefinition;
+
+            public ClassWeaver([NotNull] PropertyAccessorWeaver weaver, [NotNull] TypeDefinition classDefinition)
+            {
+                _weaver = weaver;
+                _classDefinition = classDefinition;
+            }
+
+            [NotNull]
+            [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+            private MethodDefinition StaticConstructor
+            {
+                get
+                {
+                    var constructor = _classDefinition.GetStaticConstructor();
+                    if (constructor != null)
+                        return constructor;
+
+                    const MethodAttributes attributes = MethodAttributes.Private | MethodAttributes.RTSpecialName | MethodAttributes.SpecialName | MethodAttributes.Static;
+
+                    constructor = new MethodDefinition(".cctor", attributes, _weaver._moduleDefinition.TypeSystem.Void);
+                    constructor.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
+
+                    _classDefinition.Methods.Add(constructor);
+
+                    return constructor;
+                }
+            }
+
+            [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+            [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
+            public void Execute([NotNull] Interceptors interceptors)
+            {
+                foreach (var property in _classDefinition.Properties)
+                {
+                    new PropertyWeaver(this, property).Weave(interceptors);
+                }
+            }
+
+            private class PropertyWeaver
+            {
+                [NotNull] private readonly ClassWeaver _classWeaver;
+                [NotNull] private readonly PropertyDefinition _property;
+                [NotNull] private readonly SystemReferences _systemReferences;
+
+                [CanBeNull] private FieldDefinition _propertyInfo;
+
+                private bool _isBackingFieldAccessed;
+
+                public PropertyWeaver([NotNull] ClassWeaver classWeaver, [NotNull] PropertyDefinition property)
+                {
+                    _classWeaver = classWeaver;
+                    _property = property;
+                    _systemReferences = _classWeaver._weaver._systemReferences;
+                }
+
+                public void Weave([NotNull] Interceptors interceptors)
+                {
+                    var classDefinition = _classWeaver._classDefinition;
+
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    var backingField = _property.FindAutoPropertyBackingField(classDefinition.Fields);
+                    if (backingField == null)
+                        return;
+
+                    InjectGetInterceptor(backingField, interceptors.GetInterceptor);
+                    InjectSetInterceptor(backingField, interceptors.SetInterceptor);
+
+                    if (!_isBackingFieldAccessed)
+                        classDefinition.Fields.Remove(backingField);
+                }
+
+                [NotNull]
+                [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
+                [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+                private FieldDefinition PropertyInfo
+                {
+                    get
+                    {
+                        if (_propertyInfo != null)
+                            return _propertyInfo;
+
+                        _propertyInfo = new FieldDefinition($"<{_property.Name}>k__PropertyInfo", FieldAttributes.InitOnly | FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.CompilerControlled, _classWeaver._weaver._systemReferences.PropertyInfoType);
+                        _property.DeclaringType.Fields.Add(_propertyInfo);
+
+                        _classWeaver.StaticConstructor.Body.Instructions.InsertRange(0,
+                            Instruction.Create(OpCodes.Ldtoken, _property.DeclaringType),
+                            Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle),
+                            Instruction.Create(OpCodes.Ldstr, _property.Name),
+                            Instruction.Create(OpCodes.Call, _systemReferences.GetPropertyInfo),
+                            Instruction.Create(OpCodes.Stsfld, _propertyInfo));
+
+                        return _propertyInfo;
+                    }
+                }
+
+                private void InjectGetInterceptor([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition getInterceptor)
+                {
+                    var getter = _property.GetMethod;
+                    if (getter == null)
+                        return;
+
+                    if (getInterceptor == null)
+                        throw new WeavingException($"property {_property} in class {_property.DeclaringType} has a getter, but the class has no [GetInterceptor]", getter);
+
+                    InjectInterceptor(backingField, getInterceptor, getter.Body?.Instructions, false);
+                }
+
+                private void InjectSetInterceptor([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition setInterceptor)
+                {
+                    var setter = _property.SetMethod;
+
+                    if (setter == null)
+                        return;
+
+                    if (setInterceptor == null)
+                        throw new WeavingException($"property {_property} in class {_property.DeclaringType} has a setter, but the class has no [SetInterceptor]", setter);
+
+                    InjectInterceptor(backingField, setInterceptor, setter.Body?.Instructions, true);
+                }
+
+                private void InjectInterceptor([NotNull] FieldReference backingField, [NotNull] MethodReference interceptor, [CanBeNull, ItemNotNull] IList<Instruction> instructions, bool isSetter)
+                {
+                    if (instructions == null)
+                        return;
+
+                    instructions.Clear();
+                    instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+
+                    var propertyType = _property.PropertyType;
+                    Debug.Assert(propertyType != null, nameof(propertyType) + " != null");
+
+                    var parameters = interceptor.Parameters;
+                    Debug.Assert(parameters != null, nameof(parameters) + " != null");
+
+                    foreach (var parameter in parameters)
+                    {
+                        Debug.Assert(parameter != null, nameof(parameter) + " != null");
+
+                        var parameterType = parameter.ParameterType;
+                        Debug.Assert(parameterType != null, nameof(parameterType) + " != null");
+
+                        if (parameterType.IsGenericParameter)
+                        {
+                            if (!isSetter)
+                                throw new WeavingException("A generic parameter in the getter interceptor is not supported.", interceptor);
+
+                            instructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                        }
+                        else
+                            switch (parameterType.FullName)
+                            {
+                                case "System.String":
+                                    instructions.Add(Instruction.Create(OpCodes.Ldstr, _property.Name));
+                                    break;
+
+                                case "System.Type":
+                                    instructions.AddRange(
+                                        Instruction.Create(OpCodes.Ldtoken, propertyType),
+                                        Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle));
+                                    break;
+
+                                case "System.Reflection.PropertyInfo":
+                                    instructions.Add(Instruction.Create(OpCodes.Ldsfld, PropertyInfo));
+                                    break;
+
+                                case "System.Reflection.FieldInfo":
+                                    _isBackingFieldAccessed = true;
+                                    instructions.AddRange(
+                                        Instruction.Create(OpCodes.Ldtoken, backingField),
+                                        Instruction.Create(OpCodes.Call, _systemReferences.GetFieldFromHandle));
+                                    break;
+
+                                case "System.Object":
+                                    if (!isSetter)
+                                        throw new WeavingException("A System.Object parameter in the getter interceptor is not supported.", interceptor);
+
+                                    instructions.AddRange(
+                                        Instruction.Create(OpCodes.Ldarg_1),
+                                        propertyType.IsValueType ? Instruction.Create(OpCodes.Box, propertyType) : Instruction.Create(OpCodes.Castclass, parameterType));
+                                    break;
+
+                                default:
+                                    throw new WeavingException($"A parameter of type {parameterType} in the interceptor is not supported.", interceptor);
+                            }
+                    }
+
+                    if (interceptor.ContainsGenericParameter)
+                    {
+                        // ReSharper disable once PossibleNullReferenceException
+                        if (interceptor.GenericParameters.Count != 1)
+                            throw new WeavingException("Only one generic parameter is supported in the interceptor.", interceptor);
+
+                        var generic = new GenericInstanceMethod(interceptor);
+                        // ReSharper disable once PossibleNullReferenceException
+                        generic.GenericArguments.Add(propertyType);
+
+                        interceptor = generic;
+                    }
+
+                    instructions.Add(Instruction.Create(OpCodes.Call, interceptor));
+
+                    if (!isSetter && !interceptor.IsGenericInstance)
+                    {
+                        instructions.Add(propertyType.IsValueType ? Instruction.Create(OpCodes.Unbox_Any, propertyType) : Instruction.Create(OpCodes.Castclass, propertyType));
+                    }
+
+                    instructions.Add(Instruction.Create(OpCodes.Ret));
+                }
+            }
+        }
+    }
+}
+

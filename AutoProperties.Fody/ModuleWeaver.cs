@@ -4,6 +4,7 @@
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 using System;
+using System.Linq;
 
 using AutoProperties.Fody;
 
@@ -31,16 +32,24 @@ public class ModuleWeaver : ILogger
     // An instance of Mono.Cecil.ModuleDefinition for processing
     [NotNull]
     public ModuleDefinition ModuleDefinition { get; set; }
+    [NotNull]
+    public IAssemblyResolver AssemblyResolver { get; set; }
+
+    [NotNull]
+    internal SystemReferences SystemReferences => new SystemReferences(ModuleDefinition, AssemblyResolver);
 
     public ModuleWeaver()
     {
         LogDebug = LogInfo = LogWarning = LogError = _ => { };
         LogErrorPoint = (_, __) => { };
         ModuleDefinition = ModuleDefinition.CreateModule("empty", ModuleKind.Dll);
+        AssemblyResolver = new DefaultAssemblyResolver();
     }
 
     public void Execute()
     {
+        new PropertyAccessorWeaver(this).Execute();
+
         ModuleDefinition.WeaveBackingFields(this);
 
         if (!_hasErrors)
@@ -74,5 +83,13 @@ public class ModuleWeaver : ILogger
         {
             LogError(message);
         }
+    }
+
+    void ILogger.LogError(string message, MethodReference method)
+    {
+        if (method == null)
+            LogError(message);
+        else
+            ((ILogger)this).LogError(message, ModuleDefinition.SymbolReader?.Read(method.Resolve()).SequencePoints?.FirstOrDefault());
     }
 }

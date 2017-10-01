@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoProperties.Fody", "AutoProperties.Fody\AutoProperties.Fody.csproj", "{9AF0FE45-9667-4033-93A5-799846B1A19A}"
 EndProject
@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoProperties.portable", "AutoProperties\AutoProperties.portable.csproj", "{59ACF1B9-0CB8-4673-9E00-E742E2616959}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "TestLibrary\TestLibrary.csproj", "{B6015810-8557-4176-B8C6-615E3951E68A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,8 +58,15 @@ Global
 		{59ACF1B9-0CB8-4673-9E00-E742E2616959}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59ACF1B9-0CB8-4673-9E00-E742E2616959}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59ACF1B9-0CB8-4673-9E00-E742E2616959}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6015810-8557-4176-B8C6-615E3951E68A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6015810-8557-4176-B8C6-615E3951E68A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6015810-8557-4176-B8C6-615E3951E68A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6015810-8557-4176-B8C6-615E3951E68A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {462EC066-8931-4C53-830B-1F0355759316}
 	EndGlobalSection
 EndGlobal
