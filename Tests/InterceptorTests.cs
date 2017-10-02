@@ -103,5 +103,14 @@ public class InterceptorTests
         // verify: backing fields are not removed
         Assert.AreEqual(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
     }
+
+    [Test]
+    public void ReadOnlyPropertiesTest()
+    {
+        var target = assembly.GetInstance("ClassWithReadonlyPropertiesAndOnlyGetInterceptor");
+
+        Assert.AreEqual(42, target.Property1);
+        Assert.AreEqual("42", target.Property2);
+    }
 }
 

@@ -379,3 +379,18 @@ public class ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties
     [InterceptIgnore]
     public string Property2 { get; set; } = "8";
 }
+
+public class ClassWithReadonlyPropertiesAndOnlyGetInterceptor
+{
+    private int _field = 42;
+
+    [GetInterceptor]
+    private object GetInterceptor(string propertyName, Type propertyType)
+    {
+        return Convert.ChangeType(_field, propertyType);
+    }
+
+    public int Property1 { get; } 
+
+    public string Property2 { get; }
+}
