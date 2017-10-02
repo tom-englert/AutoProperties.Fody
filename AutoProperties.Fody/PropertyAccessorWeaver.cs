@@ -172,12 +172,14 @@ namespace AutoProperties.Fody
             public void Execute([NotNull] Interceptors interceptors)
             {
                 _logger.LogInfo($"Intercept auto-properties in {_classDefinition}");
+                _logger.LogDebug($"\tGet => {interceptors.GetInterceptor}, Set => {interceptors.SetInterceptor}");
+
 
                 foreach (var property in _classDefinition.Properties)
                 {
                     if (property.CustomAttributes.GetAttribute("AutoProperties.InterceptIgnoreAttribute") != null)
                     {
-                        _logger.LogDebug($"\tSkip {property.Name} => [InterceptIgnore]");
+                        _logger.LogInfo($"\tSkip {property.Name}, has [InterceptIgnore]");
                         continue;
                     }
 
@@ -219,12 +221,11 @@ namespace AutoProperties.Fody
                     var backingField = _property.FindAutoPropertyBackingField(classDefinition.Fields);
                     if (backingField == null)
                     {
-                        _logger.LogDebug($"\tSkip {_property.Name} => not an auto-property");
+                        _logger.LogInfo($"\tSkip {_property.Name}, not an auto-property");
                         return;
                     }
 
                     _logger.LogInfo($"\tIntercept {_property.Name}");
-                    _logger.LogDebug($"\t\tGet => {interceptors.GetInterceptor}, Set => {interceptors.SetInterceptor}");
 
                     var newGetter = BuildGetter(backingField, interceptors.GetInterceptor);
                     var newSetter = BuildSetter(backingField, interceptors.SetInterceptor);
@@ -288,6 +289,7 @@ namespace AutoProperties.Fody
                     if (getInterceptor == null)
                         throw new WeavingException($"property {_property} has a getter, but the class has no [GetInterceptor].", _property.GetMethod);
 
+                    _logger.LogDebug($"\t\tIntercept getter");
                     return BuildInstructions(backingField, getInterceptor, false).ToArray();
                 }
 
@@ -303,6 +305,7 @@ namespace AutoProperties.Fody
                     if (setInterceptor == null)
                         throw new WeavingException($"property {_property} has a setter, but the class has no [SetInterceptor].", _property.SetMethod);
 
+                    _logger.LogDebug($"\t\tIntercept setter");
                     return BuildInstructions(backingField, setInterceptor, true).ToArray();
                 }
 
