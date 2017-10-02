@@ -83,6 +83,9 @@ public class InterceptorTests
     [TestCase("ClassWithUnsupportedParameter", 3)]
     [TestCase("ClassWithInterceptorAndInitializedAutoProperties", 3)]
     [TestCase("ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties", 3)]
+    [TestCase("ClassWithBadReturnTypeInGetter", 3)]
+    [TestCase("ClassWithBadReturnTypeInGenericGetter", 3)]
+    [TestCase("ClassWithBadReturnTypeInSetter", 3)]
     public void BadImplementationInterceptorTest([NotNull] string className, int expectedNumberOfFields)
     {
         var target = assembly.GetInstance(className);

@@ -24,7 +24,7 @@ public class WeaverTests
             TestContext.Out.WriteLine(message);
         }
 
-        Assert.AreEqual(6, _weaverHelper.Errors.Count);
+        Assert.AreEqual(9, _weaverHelper.Errors.Count);
     }
 
     [Test]

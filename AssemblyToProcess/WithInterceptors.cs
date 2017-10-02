@@ -394,3 +394,85 @@ public class ClassWithReadonlyPropertiesAndOnlyGetInterceptor
 
     public string Property2 { get; }
 }
+
+public class ClassWithBadReturnTypeInGetter
+{
+    private int _field = 42;
+
+    public ClassWithBadReturnTypeInGetter()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
+
+    [GetInterceptor]
+    private int GetInterceptor(string propertyName, Type propertyType, int invalid)
+    {
+        return 42;
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+    }
+
+    public int Property1 { get; set; }
+
+    public string Property2 { get; set; }
+}
+
+public class ClassWithBadReturnTypeInGenericGetter
+{
+    private int _field = 42;
+
+    public ClassWithBadReturnTypeInGenericGetter()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
+
+    [GetInterceptor]
+    private object GetInterceptor<T>(string propertyName, Type propertyType, T invalid)
+    {
+        return 42;
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+    }
+
+    public int Property1 { get; set; }
+
+    public string Property2 { get; set; }
+}
+
+public class ClassWithBadReturnTypeInSetter
+{
+    private int _field = 42;
+
+    public ClassWithBadReturnTypeInSetter()
+    {
+        Property1 = 7;
+        Property2 = "8";
+    }
+
+    [GetInterceptor]
+    private T GetInterceptor<T>(string propertyName, Type propertyType, T value)
+    {
+        return (T)Convert.ChangeType(_field, typeof(T));
+    }
+
+    [SetInterceptor]
+    private object SetInterceptor(object value, string propertyName)
+    {
+        _field = Convert.ToInt32(value);
+        return null;
+    }
+
+    public int Property1 { get; set; }
+
+    public string Property2 { get; set; }
+}

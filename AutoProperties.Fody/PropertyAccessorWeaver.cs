@@ -114,6 +114,8 @@ namespace AutoProperties.Fody
                     throw new WeavingException($"Multiple [SetInterceptor] attributed methods found in class {classDefinition}.", setInterceptors[1]);
 
                 _setInterceptor = setInterceptors.FirstOrDefault();
+
+                Verify();
             }
 
             [CanBeNull]
@@ -127,6 +129,47 @@ namespace AutoProperties.Fody
             public void Execute()
             {
                 new ClassWeaver(_weaver, _classDefinition).Execute(this);
+            }
+
+            private void Verify()
+            {
+                VerifyGetInterceptor();
+                VerifySetInterceptor();
+            }
+
+            private void VerifySetInterceptor()
+            {
+                if (_setInterceptor == null)
+                    return;
+
+                if (_setInterceptor.ReturnType?.FullName != "System.Void")
+                {
+                    throw new WeavingException($"The set interceptor of class {_classDefinition} must not return a value.", _setInterceptor);
+                }
+            }
+
+            private void VerifyGetInterceptor()
+            {
+                if (_getInterceptor != null)
+                {
+                    var returnType = _getInterceptor.ReturnType;
+                    var genericParameter = _getInterceptor.GenericParameters?.FirstOrDefault();
+
+                    if (genericParameter != null)
+                    {
+                        if (returnType?.GetElementType() != genericParameter)
+                        {
+                            throw new WeavingException($"The return type of the generic get interceptor of class {_classDefinition} must be {genericParameter.Name}.", _getInterceptor);
+                        }
+                    }
+                    else
+                    {
+                        if (returnType?.FullName != "System.Object")
+                        {
+                            throw new WeavingException($"The return type of the get interceptor of class {_classDefinition} must be System.Object.", _getInterceptor);
+                        }
+                    }
+                }
             }
         }
 
@@ -173,7 +216,6 @@ namespace AutoProperties.Fody
             {
                 _logger.LogInfo($"Intercept auto-properties in {_classDefinition}");
                 _logger.LogDebug($"\tGet => {interceptors.GetInterceptor}, Set => {interceptors.SetInterceptor}");
-
 
                 foreach (var property in _classDefinition.Properties)
                 {
