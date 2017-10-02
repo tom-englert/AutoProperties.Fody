@@ -1,3 +1,8 @@
+**1.4.0.0**
+- Add more logging
+- Support ref/out values
+- Add validation of interceptor return types
+
 **1.3.0.0**
 - Fix possible exception in SetBackingField for empty properties.
 
