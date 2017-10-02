@@ -3,9 +3,7 @@
 
 this add-in gives you extended control over auto-properties, like directly accessing the backing field or intercepting getters and setters.
 
-### Background
-
-#### [Intercepting getter and setter](PropertyInterception.md)
+### [Intercepting getter and setter of auto-properties](PropertyInterception.md)
 
 Intercepting the property accessors is useful when e.g. writing a class that provides 
 transparent access to store values like e.g. configuration store via properties. 
@@ -47,7 +45,7 @@ Especially if there are many properties, you will save a lot of annoying and err
 
 [Click here](PropertyInterception.md) to read the detailed documentation on how to use property interception.
 
-#### [Accessing the backing field](BackingFieldAccess.md)
+### [Accessing the backing field](BackingFieldAccess.md)
 
 Usually there is no need to access the backing field of an auto-property, because the property setter does just write to the backing field - no more an no less.<para/>
 
@@ -99,7 +97,7 @@ public class Derived : Class
 }
 ```
 
-[Click here](BackingFieldAccess.md) to read the detailed documentation on how to use property interception.
+[Click here](BackingFieldAccess.md) to read the detailed documentation on how to access the backing field of an auto-property.
 
 ## Icon
 
