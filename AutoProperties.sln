@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoProperties", "AutoPrope
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{658C631F-94E7-40FC-96D5-DF82FFF8B844}"
 	ProjectSection(SolutionItems) = preProject
+		BackingFieldAccess.md = BackingFieldAccess.md
+		PropertyInterception.md = PropertyInterception.md
 		README.md = README.md
 		Relase notes.md = Relase notes.md
 		Version.cs = Version.cs
