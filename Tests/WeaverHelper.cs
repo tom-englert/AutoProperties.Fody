@@ -28,6 +28,8 @@ namespace Tests
         [NotNull]
         public string OriginalAssemblyPath { get; }
         [NotNull, ItemNotNull]
+        public IList<string> Errors { get; } = new List<string>();
+        [NotNull, ItemNotNull]
         public IList<string> Messages { get; } = new List<string>();
 
 #if (!DEBUG)
@@ -72,6 +74,8 @@ namespace Tests
 
                 weavingTask.LogErrorPoint += WeavingTask_LogErrorPoint;
                 weavingTask.LogError += WeavingTask_LogError;
+                weavingTask.LogInfo += WeavingTask_LogInfo;
+                weavingTask.LogDebug += WeavingTask_LogDebug;
 
                 weavingTask.Execute();
 
@@ -87,9 +91,19 @@ namespace Tests
             Assembly = Assembly.LoadFile(NewAssemblyPath);
         }
 
+        private void WeavingTask_LogInfo([NotNull] string message)
+        {
+            Messages.Add("I:" + message);
+        }
+
+        private void WeavingTask_LogDebug([NotNull] string message)
+        {
+            Messages.Add("D:" + message);
+        }
+
         private void WeavingTask_LogError([NotNull] string message)
         {
-            Messages.Add(message);
+            Errors.Add(message);
         }
 
         private void WeavingTask_LogErrorPoint([NotNull] string message, [CanBeNull] SequencePoint sequencePoint)
@@ -99,7 +113,7 @@ namespace Tests
                 message = message + $"\r\n\t({sequencePoint.Document.Url}@{sequencePoint.StartLine}:{sequencePoint.StartColumn}\r\n\t => {File.ReadAllLines(sequencePoint.Document.Url).Skip(sequencePoint.StartLine - 1).FirstOrDefault()}";
             }
 
-            Messages.Add(message);
+            Errors.Add(message);
         }
     }
 }

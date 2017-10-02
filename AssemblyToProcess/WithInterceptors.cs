@@ -29,6 +29,8 @@ public class ClassWithSimpleInterceptors
     public int Property1 { get; set; }
 
     public string Property2 { get; set; }
+
+    public string Property3 => Property2 + "!";
 }
 
 public class ClassWithReadonlyProperty
@@ -138,25 +140,61 @@ public class ClassWithExternalGenericInterceptorsBase : ExternalInterceptorBaseW
     public string Property2 { get; set; }
 }
 
+public class ClassWithGenericInterceptorsAndFieldReference
+{
+    [GetInterceptor]
+    private T GetInterceptor<T>(string propertyName, T fieldValue)
+    {
+        return (T)Convert.ChangeType(Convert.ToInt32(fieldValue) + 1, typeof(T));
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor<T>(T value, string propertyName, out T field)
+    {
+        field = (T)Convert.ChangeType(Convert.ToInt32(value) + 2, typeof(T));
+    }
+
+    public int Property1 { get; set; } = 7;
+
+    public string Property2 { get; set; } = "8";
+}
+
+public class ClassWithMixedGenericInterceptorsAndFieldReference
+{
+    [GetInterceptor]
+    private object GetInterceptor(object fieldValue, FieldInfo fieldInfo)
+    {
+        return Convert.ChangeType(Convert.ToInt32(fieldValue) + 1, fieldInfo.FieldType);
+    }
+
+    [SetInterceptor]
+    private void SetInterceptor<T>(T value, string propertyName, out T field)
+    {
+        field = (T)Convert.ChangeType(Convert.ToInt32(value) + 2, typeof(T));
+    }
+
+    public int Property1 { get; set; } = 7;
+
+    public string Property2 { get; set; } = "8";
+}
+
 public class ClassWithInterceptorsUsingAllPossibleParameters
 {
-    private int _field = 42;
-
     [GetInterceptor]
     private object GetInterceptor(string propertyName, Type propertyType, PropertyInfo propertyInfo, FieldInfo fieldInfo)
     {
-        return Convert.ChangeType(_field, propertyType);
+        return Convert.ChangeType(Convert.ToInt32(fieldInfo.GetValue(this)) + 1, fieldInfo.FieldType);
     }
 
     [SetInterceptor]
     private void SetInterceptor(object value, string propertyName, Type propertyType, PropertyInfo propertyInfo, FieldInfo fieldInfo)
     {
-        _field = Convert.ToInt32(value);
+        fieldInfo.SetValue(this, Convert.ChangeType(Convert.ToInt32(value) + 2, fieldInfo.FieldType));
     }
 
-    public int Property1 { get; set; }
+    public int Property1 { get; set; } = 7;
 
-    public string Property2 { get; set; }
+    public string Property2 { get; set; } = "8";
 }
 
 public class BaseWithPrivateInterceptors

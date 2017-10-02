@@ -17,14 +17,23 @@ public class WeaverTests
     private readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
 
     [Test]
+    public void OutputWeaverErrors()
+    {
+        foreach (var message in _weaverHelper.Errors)
+        {
+            TestContext.Out.WriteLine(message);
+        }
+
+        Assert.AreEqual(6, _weaverHelper.Errors.Count);
+    }
+
+    [Test]
     public void OutputWeaverMessages()
     {
         foreach (var message in _weaverHelper.Messages)
         {
             TestContext.Out.WriteLine(message);
         }
-
-        Assert.AreEqual(6, _weaverHelper.Messages.Count);
     }
 
     [Test]

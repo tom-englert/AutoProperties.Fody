@@ -9,14 +9,6 @@ using Mono.Cecil.Cil;
 
 namespace AutoProperties.Fody
 {
-    internal static class BackingFieldAccessWeaverExtensions
-    {
-        internal static void WeaveBackingFields([NotNull] this ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
-        {
-            new BackingFieldAccessWeaver(moduleDefinition, logger).Weave();
-        }
-    }
-
     internal class BackingFieldAccessWeaver
     {
         [NotNull]
@@ -33,7 +25,7 @@ namespace AutoProperties.Fody
             _symbolReader = moduleDefinition.SymbolReader;
         }
 
-        internal void Weave()
+        internal void Execute()
         {
             var allTypes = _moduleDefinition.GetTypes();
 

@@ -14,9 +14,12 @@ namespace AutoProperties.Fody
 {
     internal class PropertyAccessorWeaver
     {
-        [NotNull] private readonly ModuleDefinition _moduleDefinition;
-        [NotNull] private readonly SystemReferences _systemReferences;
-        [NotNull] private readonly ILogger _logger;
+        [NotNull]
+        private readonly ModuleDefinition _moduleDefinition;
+        [NotNull]
+        private readonly SystemReferences _systemReferences;
+        [NotNull]
+        private readonly ILogger _logger;
 
         public PropertyAccessorWeaver([NotNull] ModuleWeaver moduleWeaver)
         {
@@ -76,12 +79,17 @@ namespace AutoProperties.Fody
 
         private class Interceptors
         {
-            [NotNull] private readonly TypeDefinition _classDefinition;
-            [NotNull] private readonly PropertyAccessorWeaver _weaver;
+            [NotNull]
+            private readonly TypeDefinition _classDefinition;
+            [NotNull]
+            private readonly PropertyAccessorWeaver _weaver;
 
-            [CanBeNull] private readonly Interceptors _baseTypeInterceptors;
-            [CanBeNull] private readonly MethodDefinition _setInterceptor;
-            [CanBeNull] private readonly MethodDefinition _getInterceptor;
+            [CanBeNull]
+            private readonly Interceptors _baseTypeInterceptors;
+            [CanBeNull]
+            private readonly MethodDefinition _setInterceptor;
+            [CanBeNull]
+            private readonly MethodDefinition _getInterceptor;
 
             public Interceptors([NotNull] PropertyAccessorWeaver weaver, [NotNull] TypeReference classDefinition, [CanBeNull] Interceptors baseTypeInterceptors)
             {
@@ -124,13 +132,18 @@ namespace AutoProperties.Fody
 
         private class ClassWeaver
         {
-            [NotNull] private readonly PropertyAccessorWeaver _weaver;
-            [NotNull] private readonly TypeDefinition _classDefinition;
+            [NotNull]
+            private readonly PropertyAccessorWeaver _weaver;
+            [NotNull]
+            private readonly TypeDefinition _classDefinition;
+            [NotNull]
+            private readonly ILogger _logger;
 
             public ClassWeaver([NotNull] PropertyAccessorWeaver weaver, [NotNull] TypeDefinition classDefinition)
             {
                 _weaver = weaver;
                 _classDefinition = classDefinition;
+                _logger = _weaver._logger;
             }
 
             [NotNull]
@@ -158,10 +171,15 @@ namespace AutoProperties.Fody
             [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
             public void Execute([NotNull] Interceptors interceptors)
             {
+                _logger.LogInfo($"Intercept auto-properties in {_classDefinition}");
+
                 foreach (var property in _classDefinition.Properties)
                 {
                     if (property.CustomAttributes.GetAttribute("AutoProperties.InterceptIgnoreAttribute") != null)
+                    {
+                        _logger.LogDebug($"\tSkip {property.Name} => [InterceptIgnore]");
                         continue;
+                    }
 
                     new PropertyWeaver(this, property).Execute(interceptors);
                 }
@@ -169,12 +187,18 @@ namespace AutoProperties.Fody
 
             private class PropertyWeaver
             {
-                [NotNull] private readonly ClassWeaver _classWeaver;
-                [NotNull] private readonly PropertyDefinition _property;
-                [NotNull] private readonly SystemReferences _systemReferences;
-                [NotNull] private readonly ModuleDefinition _moduleDefinition;
-
-                [CanBeNull] private FieldDefinition _propertyInfo;
+                [NotNull]
+                private readonly ClassWeaver _classWeaver;
+                [NotNull]
+                private readonly PropertyDefinition _property;
+                [NotNull]
+                private readonly SystemReferences _systemReferences;
+                [NotNull]
+                private readonly ModuleDefinition _moduleDefinition;
+                [NotNull]
+                private readonly ILogger _logger;
+                [CanBeNull]
+                private FieldDefinition _propertyInfo;
 
                 private bool _isBackingFieldAccessed;
 
@@ -184,6 +208,7 @@ namespace AutoProperties.Fody
                     _property = property;
                     _systemReferences = _classWeaver._weaver._systemReferences;
                     _moduleDefinition = _classWeaver._weaver._moduleDefinition;
+                    _logger = _classWeaver._weaver._logger;
                 }
 
                 public void Execute([NotNull] Interceptors interceptors)
@@ -193,21 +218,34 @@ namespace AutoProperties.Fody
                     // ReSharper disable once AssignNullToNotNullAttribute
                     var backingField = _property.FindAutoPropertyBackingField(classDefinition.Fields);
                     if (backingField == null)
-                        return;
-
-                    foreach (var ctor in classDefinition.GetConstructors())
                     {
-                        if (ctor.AccessesMember(backingField))
-                        {
-                            throw new WeavingException($"The auto-property {_property} is initialized and cannot be intercepted.", _property.GetMethod ?? _property.SetMethod);
-                        }
+                        _logger.LogDebug($"\tSkip {_property.Name} => not an auto-property");
+                        return;
                     }
 
-                    InjectGetInterceptor(backingField, interceptors.GetInterceptor);
-                    InjectSetInterceptor(backingField, interceptors.SetInterceptor);
+                    _logger.LogInfo($"\tIntercept {_property.Name}");
+                    _logger.LogDebug($"\t\tGet => {interceptors.GetInterceptor}, Set => {interceptors.SetInterceptor}");
+
+                    var newGetter = BuildGetter(backingField, interceptors.GetInterceptor);
+                    var newSetter = BuildSetter(backingField, interceptors.SetInterceptor);
 
                     if (!_isBackingFieldAccessed)
+                    {
+                        if (classDefinition.GetConstructors().Any(ctor => ctor.AccessesMember(backingField)))
+                        {
+                            throw new WeavingException($"The auto-property {_property} is inline initialized and cannot be intercepted.", _property.GetMethod ?? _property.SetMethod);
+                        }
+
+                        _logger.LogDebug($"\t\tRemove backing field for {_property.Name}");
                         classDefinition.Fields.Remove(backingField);
+                    }
+                    else
+                    {
+                        _logger.LogDebug($"\t\tPreserve backing field for {_property.Name} because an interceptor uses it.");
+                    }
+
+                    _property.GetMethod?.Body?.Instructions.Replace(newGetter);
+                    _property.SetMethod?.Body?.Instructions.Replace(newSetter);
                 }
 
                 [NotNull]
@@ -239,39 +277,40 @@ namespace AutoProperties.Fody
                 [CanBeNull]
                 private MethodReference Import([CanBeNull] MethodReference method) => method == null ? null : _moduleDefinition.ImportReference(method);
 
-                private void InjectGetInterceptor([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition getInterceptor)
+                [CanBeNull, ItemNotNull]
+                private IEnumerable<Instruction> BuildGetter([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition getInterceptor)
                 {
-                    var getter = _property.GetMethod;
-                    if (getter == null)
-                        return;
+                    if (_property.GetMethod == null)
+                    {
+                        _logger.LogDebug($"\t\tProperty has no getter");
+                    }
 
                     if (getInterceptor == null)
-                        throw new WeavingException($"property {_property} has a getter, but the class has no [GetInterceptor].", getter);
+                        throw new WeavingException($"property {_property} has a getter, but the class has no [GetInterceptor].", _property.GetMethod);
 
-                    InjectInterceptor(backingField, getInterceptor, getter.Body?.Instructions, false);
+                    return BuildInstructions(backingField, getInterceptor, false).ToArray();
                 }
 
-                private void InjectSetInterceptor([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition setInterceptor)
+                [CanBeNull, ItemNotNull]
+                private IEnumerable<Instruction> BuildSetter([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition setInterceptor)
                 {
-                    var setter = _property.SetMethod;
-
-                    if (setter == null)
-                        return;
+                    if (_property.SetMethod == null)
+                    {
+                        _logger.LogDebug($"\t\tProperty has no setter");
+                        return null;
+                    }
 
                     if (setInterceptor == null)
-                        throw new WeavingException($"property {_property} has a setter, but the class has no [SetInterceptor].", setter);
+                        throw new WeavingException($"property {_property} has a setter, but the class has no [SetInterceptor].", _property.SetMethod);
 
-                    InjectInterceptor(backingField, setInterceptor, setter.Body?.Instructions, true);
+                    return BuildInstructions(backingField, setInterceptor, true).ToArray();
                 }
 
-                private void InjectInterceptor([NotNull] FieldReference backingField, [NotNull] MethodReference interceptor, [CanBeNull, ItemNotNull] IList<Instruction> instructions, bool isSetter)
+                [NotNull, ItemNotNull]
+                [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
+                private IEnumerable<Instruction> BuildInstructions([NotNull] FieldReference backingField, [NotNull] MethodReference interceptor, bool isSetter)
                 {
-                    var newInstructions = new List<Instruction>();
-
-                    if (instructions == null)
-                        return;
-
-                    newInstructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+                    yield return Instruction.Create(OpCodes.Ldarg_0);
 
                     var propertyType = _property.PropertyType;
                     Debug.Assert(propertyType != null, nameof(propertyType) + " != null");
@@ -286,49 +325,71 @@ namespace AutoProperties.Fody
                         var parameterType = parameter.ParameterType;
                         Debug.Assert(parameterType != null, nameof(parameterType) + " != null");
 
-                        if (parameterType.IsGenericParameter)
+                        // ReSharper disable once PossibleNullReferenceException
+                        if (parameterType.IsByReference && parameterType.GetElementType().IsGenericParameter)
                         {
-                            if (!isSetter)
-                                throw new WeavingException($"A generic parameter in the get-interceptor {interceptor} is not supported.", interceptor);
-
-                            newInstructions.Add(Instruction.Create(OpCodes.Ldarg_1));
+                            _isBackingFieldAccessed = true;
+                            yield return Instruction.Create(OpCodes.Ldarg_0);
+                            yield return Instruction.Create(OpCodes.Ldflda, backingField);
+                        }
+                        else if (parameterType.IsGenericParameter)
+                        {
+                            if (isSetter)
+                            {
+                                yield return Instruction.Create(OpCodes.Ldarg_1);
+                            }
+                            else
+                            {
+                                _isBackingFieldAccessed = true;
+                                yield return Instruction.Create(OpCodes.Ldarg_0);
+                                yield return Instruction.Create(OpCodes.Ldfld, backingField);
+                            }
                         }
                         else
+                        {
                             switch (parameterType.FullName)
                             {
                                 case "System.String":
-                                    newInstructions.Add(Instruction.Create(OpCodes.Ldstr, _property.Name));
+                                    yield return Instruction.Create(OpCodes.Ldstr, _property.Name);
                                     break;
 
                                 case "System.Type":
-                                    newInstructions.AddRange(
-                                        Instruction.Create(OpCodes.Ldtoken, Import(propertyType)),
-                                        Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle));
+                                    yield return Instruction.Create(OpCodes.Ldtoken, Import(propertyType));
+                                    yield return Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle);
                                     break;
 
                                 case "System.Reflection.PropertyInfo":
-                                    newInstructions.Add(Instruction.Create(OpCodes.Ldsfld, PropertyInfo));
+                                    // ReSharper disable once ArrangeRedundantParentheses
+                                    yield return Instruction.Create(OpCodes.Ldsfld, PropertyInfo);
                                     break;
 
                                 case "System.Reflection.FieldInfo":
                                     _isBackingFieldAccessed = true;
-                                    newInstructions.AddRange(
-                                        Instruction.Create(OpCodes.Ldtoken, backingField),
-                                        Instruction.Create(OpCodes.Call, _systemReferences.GetFieldFromHandle));
+                                    yield return Instruction.Create(OpCodes.Ldtoken, backingField);
+                                    yield return Instruction.Create(OpCodes.Call, _systemReferences.GetFieldFromHandle);
                                     break;
 
                                 case "System.Object":
-                                    if (!isSetter)
-                                        throw new WeavingException($"A parameter of type {parameterType} in the interceptor {interceptor} is not supported.", interceptor);
+                                    if (isSetter)
+                                    {
+                                        yield return Instruction.Create(OpCodes.Ldarg_1);
+                                    }
+                                    else
+                                    {
+                                        _isBackingFieldAccessed = true;
+                                        yield return Instruction.Create(OpCodes.Ldarg_0);
+                                        yield return Instruction.Create(OpCodes.Ldfld, backingField);
+                                    }
 
-                                    newInstructions.AddRange(
-                                        Instruction.Create(OpCodes.Ldarg_1),
-                                        propertyType.IsValueType ? Instruction.Create(OpCodes.Box, Import(propertyType)) : Instruction.Create(OpCodes.Castclass, Import(parameterType)));
+                                    yield return propertyType.IsValueType 
+                                        ? Instruction.Create(OpCodes.Box, Import(propertyType)) 
+                                        : Instruction.Create(OpCodes.Castclass, Import(parameterType));
                                     break;
 
                                 default:
                                     throw new WeavingException($"A parameter of type {parameterType} in the interceptor {interceptor} is not supported.", interceptor);
                             }
+                        }
                     }
 
                     if (interceptor.ContainsGenericParameter)
@@ -344,17 +405,14 @@ namespace AutoProperties.Fody
                         interceptor = generic;
                     }
 
-                    newInstructions.Add(Instruction.Create(OpCodes.Call, Import(interceptor)));
+                    yield return Instruction.Create(OpCodes.Call, Import(interceptor));
 
                     if (!isSetter && !interceptor.IsGenericInstance)
                     {
-                        newInstructions.Add(propertyType.IsValueType ? Instruction.Create(OpCodes.Unbox_Any, Import(propertyType)) : Instruction.Create(OpCodes.Castclass, Import(propertyType)));
+                        yield return propertyType.IsValueType ? Instruction.Create(OpCodes.Unbox_Any, Import(propertyType)) : Instruction.Create(OpCodes.Castclass, Import(propertyType));
                     }
 
-                    newInstructions.Add(Instruction.Create(OpCodes.Ret));
-
-                    instructions.Clear();
-                    instructions.AddRange(newInstructions.ToArray());
+                    yield return Instruction.Create(OpCodes.Ret);
                 }
             }
         }

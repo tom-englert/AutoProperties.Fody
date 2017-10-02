@@ -49,8 +49,7 @@ public class ModuleWeaver : ILogger
     public void Execute()
     {
         new PropertyAccessorWeaver(this).Execute();
-
-        ModuleDefinition.WeaveBackingFields(this);
+        new BackingFieldAccessWeaver(ModuleDefinition, this).Execute();
 
         if (!_hasErrors)
             ModuleDefinition.RemoveReferences(this);
