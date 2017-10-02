@@ -1,3 +1,17 @@
+**NOTE:** This weaver completely replaces the existing getters and setters of all auto-properties! 
+If you combine this weaver with others that modify property accessors, 
+like e.g. [PropertyChanged.Fody](https://github.com/Fody/PropertyChanged), 
+make sure AutoProperties is the first weaver listed in your `FodyWeavers.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Weavers>
+  <AutoProperties />
+  <PropertyChanged />
+</Weavers>
+```
+---
+
 ### Intercepting getter and setter of auto-properties
 
 Intercepting the property accessors is useful when e.g. writing a class that provides 
@@ -113,3 +127,6 @@ public class MyConfiguration
 ```
 
 If you use any parameter that refers to the backing field, the backing field will be preserved. If you don't, the backing field will be removed.
+
+A full working sample implementation can be found e.g. in [ResXResourceManager](https://github.com/tom-englert/ResXResourceManager/blob/master/ResXManager.Model/Configuration.cs)
+
