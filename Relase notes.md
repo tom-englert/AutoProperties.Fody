@@ -1,3 +1,6 @@
+**1.5.0.0**
+- Preserve interceptor attributes locally to enable inheritance across modules
+
 **1.4.0.0**
 - Add more logging
 - Support ref/out values
