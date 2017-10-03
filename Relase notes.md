@@ -1,3 +1,6 @@
+**1.6.0.0**
+- Seal attributes to avoid CA warnings in target module
+
 **1.5.0.0**
 - Preserve interceptor attributes locally to enable inheritance across modules
 
