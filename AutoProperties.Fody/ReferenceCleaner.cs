@@ -102,6 +102,14 @@ internal class ReferenceCleaner
 
         if (!_localAttributeTypes.TryGetValue(attributeType.FullName, out var localAttributeType))
         {
+            if (attributeType.Module == _moduleDefinition)
+            {
+                _logger.LogInfo($"\tAssembly already contains a local attribute {attributeType.FullName}");
+                _localAttributeTypes.Add(attributeType.FullName, attributeType);
+                return customAttribute;
+            }
+
+            _logger.LogInfo($"\tAdd local attribute {attributeType.FullName}");
             var baseType = _moduleDefinition.ImportReference(attributeType.BaseType);
 
             localAttributeType = new TypeDefinition(attributeType.Namespace, attributeType.Name, TypeAttributes.BeforeFieldInit, baseType);
