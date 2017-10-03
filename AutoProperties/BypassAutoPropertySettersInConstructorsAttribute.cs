@@ -7,7 +7,7 @@ namespace AutoProperties
     /// When this attribute is set with it's parameter being <c>true</c>, all property setters of auto-properties are replaced with code that assigns the value directly to the backing field.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Assembly)]
-    public class BypassAutoPropertySettersInConstructorsAttribute : Attribute
+    public sealed class BypassAutoPropertySettersInConstructorsAttribute : Attribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BypassAutoPropertySettersInConstructorsAttribute"/> class.

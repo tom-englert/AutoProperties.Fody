@@ -41,7 +41,7 @@ internal class ReferenceCleaner
         _moduleDefinition = moduleDefinition;
     }
 
-    private void ProcessModule()
+    public void RemoveAttributes()
     {
         foreach (var type in _moduleDefinition.GetTypes())
         {
@@ -112,7 +112,7 @@ internal class ReferenceCleaner
             _logger.LogInfo($"\tAdd local attribute {attributeType.FullName}");
             var baseType = _moduleDefinition.ImportReference(attributeType.BaseType);
 
-            localAttributeType = new TypeDefinition(attributeType.Namespace, attributeType.Name, TypeAttributes.BeforeFieldInit, baseType);
+            localAttributeType = new TypeDefinition(attributeType.Namespace, attributeType.Name, TypeAttributes.BeforeFieldInit | TypeAttributes.Sealed, baseType);
             var localConstructor = new MethodDefinition(".ctor", constructor.Attributes, _moduleDefinition.TypeSystem.Void)
             {
                 HasThis = constructor.HasThis
@@ -132,8 +132,6 @@ internal class ReferenceCleaner
 
     public void RemoveReferences()
     {
-        ProcessModule();
-
         var referenceToRemove = _moduleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "AutoProperties");
         if (referenceToRemove == null)
         {

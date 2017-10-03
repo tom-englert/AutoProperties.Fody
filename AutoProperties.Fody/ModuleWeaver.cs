@@ -51,8 +51,17 @@ public class ModuleWeaver : ILogger
         new PropertyAccessorWeaver(this).Execute();
         new BackingFieldAccessWeaver(ModuleDefinition, this).Execute();
 
+        CleanReferences();
+    }
+
+    private void CleanReferences()
+    {
+        var referenceCleaner = new ReferenceCleaner(ModuleDefinition, this);
+        referenceCleaner.RemoveAttributes();
         if (!_hasErrors)
-            new ReferenceCleaner(ModuleDefinition, this).RemoveReferences();
+        {
+            referenceCleaner.RemoveReferences();
+        }
     }
 
     void ILogger.LogDebug(string message)
