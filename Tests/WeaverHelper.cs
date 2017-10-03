@@ -60,6 +60,7 @@ namespace Tests
             NewAssemblyPath = OriginalAssemblyPath.Replace(".dll", "2.dll");
 
             RegisterAssembly(AssemblyDefinition.ReadAssembly(Path.Combine(binaryDir, "TestLibrary.dll")));
+            RegisterAssembly(AssemblyDefinition.ReadAssembly(Path.Combine(binaryDir, "AutoProperties.dll")));
 
             using (var moduleDefinition = ModuleDefinition.ReadModule(OriginalAssemblyPath, new ReaderParameters(ReadingMode.Immediate) { ReadSymbols = true, AssemblyResolver = this }))
             {

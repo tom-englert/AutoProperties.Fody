@@ -16,7 +16,7 @@ namespace AutoProperties.Fody
             // ReSharper disable once AssignNullToNotNullAttribute
             return node?
                 .CustomAttributes
-                .GetAttribute("AutoProperties.BypassAutoPropertySettersInConstructorsAttribute")?
+                .GetAttribute(AttributeNames.BypassAutoPropertySettersInConstructors)?
                 .ConstructorArguments?
                 .Select(arg => arg.Value as bool?)
                 .FirstOrDefault();

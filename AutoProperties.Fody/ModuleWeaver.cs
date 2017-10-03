@@ -52,7 +52,7 @@ public class ModuleWeaver : ILogger
         new BackingFieldAccessWeaver(ModuleDefinition, this).Execute();
 
         if (!_hasErrors)
-            ModuleDefinition.RemoveReferences(this);
+            new ReferenceCleaner(ModuleDefinition, this).RemoveReferences();
     }
 
     void ILogger.LogDebug(string message)

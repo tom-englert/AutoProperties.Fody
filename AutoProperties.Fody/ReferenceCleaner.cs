@@ -9,30 +9,50 @@ using AutoProperties.Fody;
 using JetBrains.Annotations;
 
 using Mono.Cecil;
+using Mono.Cecil.Cil;
+using Mono.Cecil.Rocks;
 
-internal static class ReferenceCleaner
+internal class ReferenceCleaner
 {
     [NotNull, ItemNotNull]
-    private static readonly HashSet<string> _attributeNames = new HashSet<string>
+    private static readonly HashSet<string> _attributesToRemove = new HashSet<string>
     {
-        "AutoProperties.BypassAutoPropertySettersInConstructorsAttribute",
-        "AutoProperties.GetInterceptorAttribute",
-        "AutoProperties.SetInterceptorAttribute",
-        "AutoProperties.InterceptIgnoreAttribute"
+        AttributeNames.BypassAutoPropertySettersInConstructors,
+        AttributeNames.InterceptIgnore,
     };
 
-    private static void ProcessAssembly([NotNull] ModuleDefinition moduleDefinition)
+    [NotNull, ItemNotNull]
+    private static readonly HashSet<string> _attributesToReplace = new HashSet<string>
     {
-        foreach (var type in moduleDefinition.GetTypes())
+        AttributeNames.GetInterceptor,
+        AttributeNames.SetInterceptor
+    };
+
+    [NotNull]
+    private readonly ModuleDefinition _moduleDefinition;
+    [NotNull]
+    private readonly ILogger _logger;
+    [NotNull]
+    private readonly Dictionary<string, TypeDefinition> _localAttributeTypes = new Dictionary<string, TypeDefinition>();
+
+    public ReferenceCleaner([NotNull] ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
+    {
+        _logger = logger;
+        _moduleDefinition = moduleDefinition;
+    }
+
+    private void ProcessModule()
+    {
+        foreach (var type in _moduleDefinition.GetTypes())
         {
             ProcessType(type);
         }
 
-        RemoveAttributes(moduleDefinition.CustomAttributes);
-        RemoveAttributes(moduleDefinition.Assembly.CustomAttributes);
+        RemoveAttributes(_moduleDefinition.CustomAttributes);
+        RemoveAttributes(_moduleDefinition.Assembly.CustomAttributes);
     }
 
-    private static void ProcessType([NotNull] TypeDefinition type)
+    private void ProcessType([NotNull] TypeDefinition type)
     {
         RemoveAttributes(type.CustomAttributes);
 
@@ -52,33 +72,71 @@ internal static class ReferenceCleaner
         }
     }
 
-    private static void RemoveAttributes([NotNull, ItemNotNull] ICollection<CustomAttribute> customAttributes)
+    private void RemoveAttributes([NotNull, ItemNotNull] ICollection<CustomAttribute> customAttributes)
     {
-        var attributes = customAttributes
-            .Where(attribute => _attributeNames.Contains(attribute.Constructor?.DeclaringType?.FullName))
+        var attributesToRemove = customAttributes
+            .Where(attribute => _attributesToRemove.Contains(attribute.Constructor.DeclaringType.FullName))
             .ToArray();
 
-        foreach (var customAttribute in attributes.ToList())
+        foreach (var customAttribute in attributesToRemove.ToList())
         {
             customAttributes.Remove(customAttribute);
         }
+
+        var attributesToReplace = customAttributes
+            .Where(attribute => _attributesToReplace.Contains(attribute.Constructor.DeclaringType.FullName))
+            .ToArray();
+
+        foreach (var customAttribute in attributesToReplace.ToList())
+        {
+            customAttributes.Remove(customAttribute);
+            customAttributes.Add(GetLocal(customAttribute));
+        }
     }
 
-    public static void RemoveReferences([NotNull] this ModuleDefinition moduleDefinition, [NotNull] ILogger logger)
+    [NotNull]
+    private CustomAttribute GetLocal([NotNull] CustomAttribute customAttribute)
     {
-        ProcessAssembly(moduleDefinition);
+        var constructor = customAttribute.Constructor.Resolve();
+        var attributeType = constructor.DeclaringType.Resolve();
 
-        var referenceToRemove = moduleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "AutoProperties");
+        if (!_localAttributeTypes.TryGetValue(attributeType.FullName, out var localAttributeType))
+        {
+            var baseType = _moduleDefinition.ImportReference(attributeType.BaseType);
+
+            localAttributeType = new TypeDefinition(attributeType.Namespace, attributeType.Name, TypeAttributes.BeforeFieldInit, baseType);
+            var localConstructor = new MethodDefinition(".ctor", constructor.Attributes, _moduleDefinition.TypeSystem.Void)
+            {
+                HasThis = constructor.HasThis
+            };
+
+            localConstructor.Body.Instructions.AddRange(
+                Instruction.Create(OpCodes.Ldarg_0),
+                Instruction.Create(OpCodes.Call, _moduleDefinition.ImportReference(baseType.Resolve().GetConstructors().First(ctor => !ctor.HasParameters))),
+                Instruction.Create(OpCodes.Ret));
+            localAttributeType.Methods.Add(localConstructor);
+            _moduleDefinition.Types.Add(localAttributeType);
+            _localAttributeTypes.Add(attributeType.FullName, localAttributeType);
+        }
+
+        return new CustomAttribute(localAttributeType.GetConstructors().First());
+    }
+
+    public void RemoveReferences()
+    {
+        ProcessModule();
+
+        var referenceToRemove = _moduleDefinition.AssemblyReferences.FirstOrDefault(x => x.Name == "AutoProperties");
         if (referenceToRemove == null)
         {
-            logger.LogInfo("\tNo reference to 'AutoProperties' found. References not modified.");
+            _logger.LogInfo("\tNo reference to 'AutoProperties' found. References not modified.");
             return;
         }
 
-        logger.LogInfo("\tRemoving reference to 'AutoProperties'.");
-        if (!moduleDefinition.AssemblyReferences.Remove(referenceToRemove))
+        _logger.LogInfo("\tRemoving reference to 'AutoProperties'.");
+        if (!_moduleDefinition.AssemblyReferences.Remove(referenceToRemove))
         {
-            logger.LogWarning("\tCould not remove all references to 'AutoProperties'.");
+            _logger.LogWarning("\tCould not remove all references to 'AutoProperties'.");
         }
     }
 }

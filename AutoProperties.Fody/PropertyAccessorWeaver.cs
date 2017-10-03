@@ -101,19 +101,19 @@ namespace AutoProperties.Fody
                 if (allMethods == null)
                     return;
 
-                var getInterceptors = allMethods.Where(m => m?.CustomAttributes?.GetAttribute("AutoProperties.GetInterceptorAttribute") != null).ToArray();
+                var getInterceptors = allMethods.Where(m => m?.CustomAttributes?.GetAttribute(AttributeNames.GetInterceptor) != null).ToArray();
                 if (getInterceptors.Length > 1)
                     throw new WeavingException($"Multiple [GetInterceptor] attributed methods found in class {classDefinition}.", getInterceptors[1]);
 
                 _getInterceptor = getInterceptors.FirstOrDefault();
 
-                var setInterceptors = allMethods.Where(m => m?.CustomAttributes?.GetAttribute("AutoProperties.SetInterceptorAttribute") != null).ToArray();
+                var setInterceptors = allMethods.Where(m => m?.CustomAttributes?.GetAttribute(AttributeNames.SetInterceptor) != null).ToArray();
                 if (setInterceptors.Length > 1)
                     throw new WeavingException($"Multiple [SetInterceptor] attributed methods found in class {classDefinition}.", setInterceptors[1]);
 
                 _setInterceptor = setInterceptors.FirstOrDefault();
 
-                Verify();
+                VerifyInterceptors();
             }
 
             [NotNull]
@@ -132,7 +132,7 @@ namespace AutoProperties.Fody
                 new ClassWeaver(_weaver, ClassDefinition).Execute(this);
             }
 
-            private void Verify()
+            private void VerifyInterceptors()
             {
                 VerifyGetInterceptor();
                 VerifySetInterceptor();
@@ -151,24 +151,24 @@ namespace AutoProperties.Fody
 
             private void VerifyGetInterceptor()
             {
-                if (_getInterceptor != null)
-                {
-                    var returnType = _getInterceptor.ReturnType;
-                    var genericParameter = _getInterceptor.GenericParameters?.FirstOrDefault();
+                if (_getInterceptor == null)
+                    return;
 
-                    if (genericParameter != null)
+                var returnType = _getInterceptor.ReturnType;
+                var genericParameter = _getInterceptor.GenericParameters?.FirstOrDefault();
+
+                if (genericParameter != null)
+                {
+                    if (returnType?.GetElementType() != genericParameter)
                     {
-                        if (returnType?.GetElementType() != genericParameter)
-                        {
-                            throw new WeavingException($"The return type of the generic get interceptor of class {ClassDefinition} must be {genericParameter.Name}.", _getInterceptor);
-                        }
+                        throw new WeavingException($"The return type of the generic get interceptor of class {ClassDefinition} must be {genericParameter.Name}.", _getInterceptor);
                     }
-                    else
+                }
+                else
+                {
+                    if (returnType?.FullName != "System.Object")
                     {
-                        if (returnType?.FullName != "System.Object")
-                        {
-                            throw new WeavingException($"The return type of the get interceptor of class {ClassDefinition} must be System.Object.", _getInterceptor);
-                        }
+                        throw new WeavingException($"The return type of the get interceptor of class {ClassDefinition} must be System.Object.", _getInterceptor);
                     }
                 }
             }
@@ -220,7 +220,7 @@ namespace AutoProperties.Fody
 
                 foreach (var property in _classDefinition.Properties)
                 {
-                    if (property.CustomAttributes.GetAttribute("AutoProperties.InterceptIgnoreAttribute") != null)
+                    if (property.CustomAttributes.GetAttribute(AttributeNames.InterceptIgnore) != null)
                     {
                         _logger.LogInfo($"\tSkip {property.Name}, has [InterceptIgnore]");
                         continue;

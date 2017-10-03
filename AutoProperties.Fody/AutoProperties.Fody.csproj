@@ -71,6 +71,7 @@
     <Compile Include="..\Version.cs">
       <Link>Version.cs</Link>
     </Compile>
+    <Compile Include="AttributeNames.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="InstructionSequence.cs" />
     <Compile Include="InstructionSequences.cs" />
