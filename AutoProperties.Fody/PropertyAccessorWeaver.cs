@@ -58,7 +58,7 @@ namespace AutoProperties.Fody
                 }
 
                 // ReSharper disable once PossibleNullReferenceException
-                foreach (var interceptors in allInterceptors.Values.Where(item => item.HasValues))
+                foreach (var interceptors in allInterceptors.Values.Where(item => (item.ClassDefinition.Module == _moduleDefinition) && item.HasValues))
                 {
                     try
                     {
@@ -80,8 +80,6 @@ namespace AutoProperties.Fody
         private class Interceptors
         {
             [NotNull]
-            private readonly TypeDefinition _classDefinition;
-            [NotNull]
             private readonly PropertyAccessorWeaver _weaver;
 
             [CanBeNull]
@@ -95,11 +93,11 @@ namespace AutoProperties.Fody
             {
                 _weaver = weaver;
                 // ReSharper disable once AssignNullToNotNullAttribute
-                _classDefinition = classDefinition.Resolve();
+                ClassDefinition = classDefinition.Resolve();
                 _baseTypeInterceptors = baseTypeInterceptors;
 
                 // ReSharper disable once PossibleNullReferenceException
-                var allMethods = _classDefinition.Methods;
+                var allMethods = ClassDefinition.Methods;
                 if (allMethods == null)
                     return;
 
@@ -118,6 +116,9 @@ namespace AutoProperties.Fody
                 Verify();
             }
 
+            [NotNull]
+            public TypeDefinition ClassDefinition { get; }
+
             [CanBeNull]
             public MethodDefinition SetInterceptor => _setInterceptor ?? _baseTypeInterceptors?.SetInterceptor.WhenAccessibleInDerivedClass();
 
@@ -128,7 +129,7 @@ namespace AutoProperties.Fody
 
             public void Execute()
             {
-                new ClassWeaver(_weaver, _classDefinition).Execute(this);
+                new ClassWeaver(_weaver, ClassDefinition).Execute(this);
             }
 
             private void Verify()
@@ -144,7 +145,7 @@ namespace AutoProperties.Fody
 
                 if (_setInterceptor.ReturnType?.FullName != "System.Void")
                 {
-                    throw new WeavingException($"The set interceptor of class {_classDefinition} must not return a value.", _setInterceptor);
+                    throw new WeavingException($"The set interceptor of class {ClassDefinition} must not return a value.", _setInterceptor);
                 }
             }
 
@@ -159,14 +160,14 @@ namespace AutoProperties.Fody
                     {
                         if (returnType?.GetElementType() != genericParameter)
                         {
-                            throw new WeavingException($"The return type of the generic get interceptor of class {_classDefinition} must be {genericParameter.Name}.", _getInterceptor);
+                            throw new WeavingException($"The return type of the generic get interceptor of class {ClassDefinition} must be {genericParameter.Name}.", _getInterceptor);
                         }
                     }
                     else
                     {
                         if (returnType?.FullName != "System.Object")
                         {
-                            throw new WeavingException($"The return type of the get interceptor of class {_classDefinition} must be System.Object.", _getInterceptor);
+                            throw new WeavingException($"The return type of the get interceptor of class {ClassDefinition} must be System.Object.", _getInterceptor);
                         }
                     }
                 }
@@ -426,8 +427,8 @@ namespace AutoProperties.Fody
                                         yield return Instruction.Create(OpCodes.Ldfld, backingField);
                                     }
 
-                                    yield return propertyType.IsValueType 
-                                        ? Instruction.Create(OpCodes.Box, Import(propertyType)) 
+                                    yield return propertyType.IsValueType
+                                        ? Instruction.Create(OpCodes.Box, Import(propertyType))
                                         : Instruction.Create(OpCodes.Castclass, Import(parameterType));
                                     break;
 
