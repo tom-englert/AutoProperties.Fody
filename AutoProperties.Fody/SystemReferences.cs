@@ -33,8 +33,10 @@ namespace AutoProperties.Fody
 
             GetPropertyInfo = moduleDefinition.ImportReference(typeType.Methods
                 .First(x => (x.Name == "GetProperty") &&
-                            (x.Parameters.Count == 1) &&
-                            (x.Parameters[0].ParameterType.Name == "String")));
+                            (x.Parameters.Count == 2) &&
+                            (x.Parameters[0].ParameterType.Name == "String") &&
+                            (x.Parameters[1].ParameterType.Name == "BindingFlags")
+                            ));
         }
 
         [NotNull]

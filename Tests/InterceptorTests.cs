@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System;
+using System.ComponentModel.Composition.Hosting;
+using System.IO;
+using System.Reflection;
 
 using JetBrains.Annotations;
 
@@ -114,6 +117,30 @@ public class InterceptorTests
 
         Assert.AreEqual(42, target.Property1);
         Assert.AreEqual("42", target.Property2);
+    }
+
+    [Test]
+    public void RemoteTests()
+    {
+        var catalog = new AggregateCatalog();
+        var container = new CompositionContainer(catalog);
+
+        var baseDirectory = Path.GetDirectoryName(assembly.Location);
+        Assembly.LoadFrom(Path.Combine(baseDirectory, "TestLibrary.dll"));
+        Assembly.LoadFrom(Path.Combine(baseDirectory, "AutoProperties.dll"));
+
+        catalog.Catalogs.Add(new AssemblyCatalog(assembly));
+
+        var actions = container.GetExportedValues<Action>();
+
+        foreach (var action in actions)
+        {
+            var method = action.Method;
+
+            TestContext.Out.WriteLine($"Run {method.DeclaringType.Name}.{method.Name}");
+            action();
+        }
+
     }
 }
 

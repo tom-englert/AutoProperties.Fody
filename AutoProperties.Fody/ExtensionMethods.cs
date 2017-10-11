@@ -107,12 +107,6 @@ namespace AutoProperties.Fody
             return true;
         }
 
-        [CanBeNull]
-        public static MethodDefinition WhenAccessibleInDerivedClass([CanBeNull] this MethodDefinition baseMethodDefinition)
-        {
-            return baseMethodDefinition?.IsPrivate != false ? null : baseMethodDefinition;
-        }
-
         [NotNull, ItemNotNull]
         public static IEnumerable<TypeDefinition> GetSelfAndBaseTypes([NotNull] this TypeDefinition type)
         {
@@ -166,6 +160,116 @@ namespace AutoProperties.Fody
         public static bool AccessesMember([NotNull] this MethodDefinition method, [NotNull] IMemberDefinition member)
         {
             return method.Body?.Instructions?.Any(inst => inst?.Operand == member) ?? false;
+        }
+
+        [NotNull]
+        public static FieldReference GetReference([NotNull] this FieldDefinition field)
+        {
+            var declaringType = field.DeclaringType;
+
+            if (!declaringType.HasGenericParameters)
+                return field;
+
+            var generic = new GenericInstanceType(declaringType);
+
+            generic.GenericArguments.AddRange(declaringType.GenericParameters);
+
+            var genericField = new FieldReference(field.Name, field.FieldType, generic);
+
+            return genericField;
+        }
+
+	    [NotNull]
+	    public static TypeReference GetReference([NotNull] this TypeReference type)
+	    {
+		    return GetReference(type, type.GenericParameters.Cast<TypeReference>().ToArray());
+	    }
+
+
+	    [NotNull]
+        public static TypeReference GetReference([NotNull] this TypeReference type, [NotNull, ItemNotNull] ICollection<TypeReference> arguments)
+        {
+            if (!type.HasGenericParameters)
+                return type;
+
+            if (type.GenericParameters.Count != arguments.Count)
+                throw new ArgumentException("Generic parameters mismatch");
+
+            var instance = new GenericInstanceType(type);
+            foreach (var argument in arguments)
+                instance.GenericArguments.Add(argument);
+
+            return instance;
+        }
+
+        [NotNull]
+        public static MethodReference GetReference([NotNull] this MethodReference callee, [NotNull] TypeReference callingType)
+        {
+            return callingType.Module.ImportReference(InnerGetReference(callee, callingType));
+        }
+
+        [NotNull]
+        private static MethodReference InnerGetReference([NotNull] MethodReference callee, [NotNull] TypeReference callingType)
+        {
+            var calleeType = callee.DeclaringType.Resolve();
+
+            var baseType = callingType;
+            var genericParameters = callingType.GenericParameters.ToArray();
+            var genericArguments = genericParameters.Cast<TypeReference>().ToArray();
+
+            while (baseType.Resolve() != calleeType)
+            {
+                baseType = baseType.Resolve().BaseType;
+                if (baseType == null)
+                    return callee;
+
+                if (baseType is IGenericInstance genericInstance)
+                {
+                    var arguments = genericInstance.GenericArguments.ToArray();
+
+                    if (genericParameters != null)
+                    {
+                        for (var i = 0; i < arguments.Count(); i++)
+                        {
+                            var argument = arguments[i];
+
+                            if (!argument.ContainsGenericParameter)
+                                continue;
+
+                            for (var k = 0; k < genericParameters.Count(); k++)
+                            {
+                                if (genericParameters[k].Name != argument.Name)
+                                    continue;
+
+                                arguments[i] = genericArguments[k];
+                                break;
+                            }
+                        }
+                    }
+
+                    genericArguments = arguments;
+                    genericParameters = baseType.GetElementType().GenericParameters.ToArray();
+                }
+
+                if (baseType.Resolve() == calleeType)
+                    break;
+            }
+
+            if (!genericArguments.Any())
+                return callee;
+
+            var reference = new MethodReference(callee.Name, callee.ReturnType)
+            {
+                DeclaringType = callee.DeclaringType.GetReference(genericArguments.ToArray()),
+                HasThis = callee.HasThis,
+                ExplicitThis = callee.ExplicitThis,
+                CallingConvention = callee.CallingConvention,
+            };
+
+            reference.Parameters.AddRange(callee.Parameters.Select(parameter => new ParameterDefinition(parameter.ParameterType)));
+            reference.GenericParameters.AddRange(callee.GenericParameters.Select(parameter => new GenericParameter(parameter.Name, reference)));
+
+            return reference;
         }
     }
 }

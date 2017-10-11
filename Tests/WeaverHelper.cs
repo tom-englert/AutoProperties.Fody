@@ -104,6 +104,7 @@ namespace Tests
 
         private void WeavingTask_LogError([NotNull] string message)
         {
+            Messages.Add("E:" + message);
             Errors.Add(message);
         }
 
@@ -114,6 +115,7 @@ namespace Tests
                 message = message + $"\r\n\t({sequencePoint.Document.Url}@{sequencePoint.StartLine}:{sequencePoint.StartColumn}\r\n\t => {File.ReadAllLines(sequencePoint.Document.Url).Skip(sequencePoint.StartLine - 1).FirstOrDefault()}";
             }
 
+            Messages.Add("E:" + message);
             Errors.Add(message);
         }
     }

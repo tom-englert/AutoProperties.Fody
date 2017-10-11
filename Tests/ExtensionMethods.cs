@@ -34,7 +34,7 @@ namespace Tests
             var fullName = Path.Combine(location, name.Name + ".dll");
 
             if (File.Exists(fullName))
-                return Assembly.LoadFrom(fullName);
+                return Assembly.LoadFile(fullName);
             
             return null;
         }
