@@ -1,3 +1,6 @@
+**1.7.0.0**
+- Fix #2: Support generics and private/explicit implemented properties
+
 **1.6.0.0**
 - Seal attributes to avoid CA warnings in target module
 
@@ -10,7 +13,7 @@
 - Add validation of interceptor return types
 
 **1.3.0.0**
-- Fix possible exception in SetBackingField for empty properties.
+- Fix possible exception in SetBackingField for empty properties
 
 **1.2.0.0**
 - Add auto-property interceptor
