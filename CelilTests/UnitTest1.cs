@@ -84,6 +84,23 @@ namespace CecilTests
         class Seven : Four<int, string>
         {
         }
+
+        [Description("System.Void CecilTests.Set1.One`1<System.Int32>::Method()")]
+        class Eight<T> : Six
+        {
+        }
+
+        [Description("System.Void CecilTests.Set1.One`1<System.String>::Method()")]
+        class Nine<T> : Seven
+        {
+        }
+
+        [Description("System.Void CecilTests.Set1.One`1<System.String>::Method()")]
+        class Ten<Q> : Nine<Q>
+        {
+        }
+
+
     }
 
     namespace Set2

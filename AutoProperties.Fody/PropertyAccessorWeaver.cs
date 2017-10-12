@@ -331,10 +331,12 @@ namespace AutoProperties.Fody
                             return _propertyInfo;
 
                         _propertyInfo = new FieldDefinition($"<{_property.Name}>k__PropertyInfo", FieldAttributes.InitOnly | FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.CompilerControlled, _classWeaver._weaver._systemReferences.PropertyInfoType);
-                        _property.DeclaringType.Fields.Add(_propertyInfo);
+
+                        var declaringType = _property.DeclaringType;
+                        declaringType.Fields.Add(_propertyInfo);
 
                         _classWeaver.StaticConstructor.Body.Instructions.InsertRange(0,
-                            Instruction.Create(OpCodes.Ldtoken, _property.DeclaringType.GetReference()),
+                            Instruction.Create(OpCodes.Ldtoken, declaringType.GetReference()),
                             Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle),
                             Instruction.Create(OpCodes.Ldstr, _property.Name),
                             Instruction.Create(OpCodes.Ldc_I4, (int)(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)),

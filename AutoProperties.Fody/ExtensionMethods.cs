@@ -179,15 +179,14 @@ namespace AutoProperties.Fody
             return genericField;
         }
 
-	    [NotNull]
-	    public static TypeReference GetReference([NotNull] this TypeReference type)
-	    {
-		    return GetReference(type, type.GenericParameters.Cast<TypeReference>().ToArray());
-	    }
+        [NotNull]
+        public static TypeReference GetReference([NotNull] this TypeReference type)
+        {
+            return GetReference(type, type.GenericParameters.Cast<TypeReference>().ToArray());
+        }
 
-
-	    [NotNull]
-        public static TypeReference GetReference([NotNull] this TypeReference type, [NotNull, ItemNotNull] ICollection<TypeReference> arguments)
+        [NotNull]
+        private static TypeReference GetReference([NotNull] this TypeReference type, [NotNull, ItemNotNull] ICollection<TypeReference> arguments)
         {
             if (!type.HasGenericParameters)
                 return type;
@@ -227,32 +226,26 @@ namespace AutoProperties.Fody
                 {
                     var arguments = genericInstance.GenericArguments.ToArray();
 
-                    if (genericParameters != null)
+                    for (var i = 0; i < arguments.Length; i++)
                     {
-                        for (var i = 0; i < arguments.Count(); i++)
-                        {
-                            var argument = arguments[i];
+                        var argument = arguments[i];
 
-                            if (!argument.ContainsGenericParameter)
+                        if (!argument.ContainsGenericParameter)
+                            continue;
+
+                        for (var k = 0; k < genericParameters.Length; k++)
+                        {
+                            if (genericParameters[k].Name != argument.Name)
                                 continue;
 
-                            for (var k = 0; k < genericParameters.Count(); k++)
-                            {
-                                if (genericParameters[k].Name != argument.Name)
-                                    continue;
-
-                                arguments[i] = genericArguments[k];
-                                break;
-                            }
+                            arguments[i] = genericArguments[k];
+                            break;
                         }
                     }
 
                     genericArguments = arguments;
                     genericParameters = baseType.GetElementType().GenericParameters.ToArray();
                 }
-
-                if (baseType.Resolve() == calleeType)
-                    break;
             }
 
             if (!genericArguments.Any())
