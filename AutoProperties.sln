@@ -30,8 +30,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoProperties.portable", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLibrary", "TestLibrary\TestLibrary.csproj", "{B6015810-8557-4176-B8C6-615E3951E68A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CecilTests", "CelilTests\CecilTests.csproj", "{147A63E6-DEE3-414C-823A-697682E43740}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,10 +64,6 @@ Global
 		{B6015810-8557-4176-B8C6-615E3951E68A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6015810-8557-4176-B8C6-615E3951E68A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6015810-8557-4176-B8C6-615E3951E68A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{147A63E6-DEE3-414C-823A-697682E43740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{147A63E6-DEE3-414C-823A-697682E43740}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{147A63E6-DEE3-414C-823A-697682E43740}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{147A63E6-DEE3-414C-823A-697682E43740}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

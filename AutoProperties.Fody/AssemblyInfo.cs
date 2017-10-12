@@ -7,4 +7,4 @@ using System.Runtime.InteropServices;
 [assembly: CLSCompliant(false)]
 [assembly: ComVisible(false)]
 
-[assembly: InternalsVisibleTo("CecilTests")]
+[assembly: InternalsVisibleTo("Tests")]
