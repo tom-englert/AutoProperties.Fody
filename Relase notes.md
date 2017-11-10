@@ -1,3 +1,6 @@
+**1.8.0.0**
+- Fix #3: Invalid code generated when SetBackingField contains any conditions
+
 **1.7.0.0**
 - Fix #2: Support generics and private/explicit implemented properties
 
