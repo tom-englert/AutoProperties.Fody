@@ -90,7 +90,14 @@ namespace AutoProperties.Fody
 
                 var startIndex = StartIndex;
 
+                var oldValue = _instructions[startIndex + index];
                 _instructions[startIndex + index] = value;
+
+                foreach (var instr in _instructions)
+                {
+                    if (instr.Operand == oldValue)
+                        instr.Operand = value;
+                }
             }
         }
 

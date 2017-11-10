@@ -94,16 +94,21 @@ public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoProp
 
 public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter : ObservableObject
 {
+    private bool _x;
+
     public ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter()
     {
         Property2.SetBackingField("Test" + Math.Abs(2));
         Property1.SetBackingField(Property2 + "A");
         Property1.SetBackingField(Property2.TrimEnd('2'));
+        Property3.SetBackingField(Property1 == "Test2A" || !_x);
     }
 
     public string Property1 { get; set; }
 
     public string Property2 { get; set; }
+
+    public bool Property3 { get; set; }
 
     public bool IsChanged { get; set; }
 }
