@@ -98,6 +98,21 @@ public class ModuleWeaver : ILogger
         if (method == null)
             LogError(message);
         else
-            ((ILogger)this).LogError(message, ModuleDefinition.SymbolReader?.Read(method.Resolve()).SequencePoints?.FirstOrDefault());
+        {
+            ((ILogger)this).LogError(message, GetFirstSequencePoint(method));
+        }
+    }
+
+    [CanBeNull]
+    private SequencePoint GetFirstSequencePoint([NotNull] MethodReference method)
+    {
+        try
+        {
+            return ModuleDefinition.SymbolReader?.Read(method.Resolve())?.SequencePoints?.FirstOrDefault();
+        }
+        catch
+        {
+            return null;
+        }
     }
 }
