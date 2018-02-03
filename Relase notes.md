@@ -1,3 +1,6 @@
+**1.9.0.0**
+- Fix #4: Support NetStandard projects
+
 **1.8.0.0**
 - Fix #3: Invalid code generated when SetBackingField contains any conditions
 
