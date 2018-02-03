@@ -121,7 +121,9 @@ namespace AutoProperties.Fody
         [CanBeNull]
         public static TValue GetValueOrDefault<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> dictionary, [CanBeNull] TKey key)
         {
+#pragma warning disable IDE0041 // Use 'is null' check
             if (ReferenceEquals(key, null))
+#pragma warning restore IDE0041 // Use 'is null' check
                 return default(TValue);
 
             return dictionary.TryGetValue(key, out var value) ? value : default(TValue);
@@ -263,6 +265,12 @@ namespace AutoProperties.Fody
             reference.GenericParameters.AddRange(callee.GenericParameters.Select(parameter => new GenericParameter(parameter.Name, reference)));
 
             return reference;
+        }
+
+        [CanBeNull]
+        public static MethodReference TryImportReference([NotNull] this ModuleDefinition module, [CanBeNull] MethodReference method)
+        {
+            return method == null ? null : module.ImportReference(method);
         }
     }
 }

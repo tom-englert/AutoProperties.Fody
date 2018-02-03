@@ -39,22 +39,23 @@ namespace Tests
 #endif
 
         [NotNull]
-        public static WeaverHelper Create([NotNull] string assemblyName = "AssemblyToProcess")
+        public static WeaverHelper Create([NotNull] string assemblyName = "AssemblyToProcess", [NotNull] string framework = "Net46")
         {
             lock (typeof(WeaverHelper))
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                return _cache.ForceValue(assemblyName, _ => new WeaverHelper(assemblyName));
+                return _cache.ForceValue(assemblyName, _ => new WeaverHelper(assemblyName, framework));
             }
         }
 
-        private WeaverHelper([NotNull] string assemblyName)
+        private WeaverHelper([NotNull] string assemblyName, [NotNull] string framework)
         {
             // ReSharper disable once AssignNullToNotNullAttribute
             // ReSharper disable once PossibleNullReferenceException
             var projectDir = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, $@"..\..\..\..\{assemblyName}"));
 
-            var binaryDir = Path.Combine(projectDir, @"bin", Configuration, "Net45");
+            ;
+            var binaryDir = Path.Combine(projectDir, @"bin", Configuration, framework);
             OriginalAssemblyPath = Path.Combine(binaryDir, $@"{assemblyName}.dll");
 
             NewAssemblyPath = OriginalAssemblyPath.Replace(".dll", "2.dll");

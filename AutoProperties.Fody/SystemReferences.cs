@@ -14,7 +14,7 @@ namespace AutoProperties.Fody
     {
         public SystemReferences([NotNull] ModuleDefinition moduleDefinition, [NotNull] IAssemblyResolver assemblyResolver)
         {
-            var assemblies = new[] { "mscorlib", "System.Reflection", "System.Runtime" };
+            var assemblies = new[] { "mscorlib", "System", "System.Reflection", "System.Runtime", "netstandard" };
             var coreTypes = assemblies.SelectMany(assembly => GetTypes(assemblyResolver, assembly)).ToArray();
 
             var fieldInfoType = coreTypes.First(x => x.Name == "FieldInfo");
@@ -26,13 +26,14 @@ namespace AutoProperties.Fody
             PropertyInfoType = moduleDefinition.ImportReference(coreTypes.First(x => x.Name == "PropertyInfo"));
 
             var typeType = coreTypes.First(x => x.Name == "Type");
+
             GetTypeFromHandle = moduleDefinition.ImportReference(typeType.Methods
                 .First(x => (x.Name == "GetTypeFromHandle") &&
                             (x.Parameters.Count == 1) &&
                             (x.Parameters[0].ParameterType.Name == "RuntimeTypeHandle")));
 
-            GetPropertyInfo = moduleDefinition.ImportReference(typeType.Methods
-                .First(x => (x.Name == "GetProperty") &&
+            GetPropertyInfo = moduleDefinition.TryImportReference(typeType.Methods
+                .FirstOrDefault(x => (x.Name == "GetProperty") &&
                             (x.Parameters.Count == 2) &&
                             (x.Parameters[0].ParameterType.Name == "String") &&
                             (x.Parameters[1].ParameterType.Name == "BindingFlags")
@@ -51,7 +52,7 @@ namespace AutoProperties.Fody
         [NotNull, ItemNotNull]
         private static IEnumerable<TypeDefinition> GetTypes([NotNull] IAssemblyResolver assemblyResolver, [NotNull] string name)
         {
-            return assemblyResolver.Resolve(new AssemblyNameReference(name, null))?.MainModule.Types ?? Enumerable.Empty<TypeDefinition>();
+            return assemblyResolver.Resolve(new AssemblyNameReference(name, null))?.MainModule.Types.Where(t => t.IsPublic) ?? Enumerable.Empty<TypeDefinition>();
         }
     }
 }

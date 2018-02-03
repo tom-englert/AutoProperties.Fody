@@ -25,4 +25,10 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <Target Name="Postbuild" AfterTargets="Build">
+    <Message Text="Test" />
+    <MakeDir Directories="$(SolutionDir)Tools" />
+    <Copy SourceFiles="$(TargetDir)AutoProperties.Fody.dll" DestinationFolder="$(SolutionDir)Tools" />
+    <Copy SourceFiles="$(TargetDir)AutoProperties.Fody.pdb" DestinationFolder="$(SolutionDir)Tools" />
+  </Target>
 </Project>

@@ -335,12 +335,17 @@ namespace AutoProperties.Fody
                         var declaringType = _property.DeclaringType;
                         declaringType.Fields.Add(_propertyInfo);
 
+                        var getPropertyInfo = _systemReferences.GetPropertyInfo;
+
+                        if (getPropertyInfo == null)
+                            throw new WeavingException("The PropertyInfo parameter is not supported in the current framework.");
+
                         _classWeaver.StaticConstructor.Body.Instructions.InsertRange(0,
                             Instruction.Create(OpCodes.Ldtoken, declaringType.GetReference()),
                             Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle),
                             Instruction.Create(OpCodes.Ldstr, _property.Name),
                             Instruction.Create(OpCodes.Ldc_I4, (int)(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)),
-                            Instruction.Create(OpCodes.Call, _systemReferences.GetPropertyInfo),
+                            Instruction.Create(OpCodes.Call, getPropertyInfo),
                             Instruction.Create(OpCodes.Stsfld, _propertyInfo));
 
                         return _propertyInfo;
