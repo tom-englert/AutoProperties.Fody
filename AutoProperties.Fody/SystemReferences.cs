@@ -46,7 +46,7 @@ namespace AutoProperties.Fody
         public TypeReference PropertyInfoType { get; }
         [NotNull]
         public MethodReference GetFieldFromHandle { get; }
-        [NotNull]
+        [CanBeNull]
         public MethodReference GetPropertyInfo { get; }
 
         [NotNull, ItemNotNull]
