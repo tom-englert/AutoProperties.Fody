@@ -17,9 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="AutoProperties.Fody.nuspec" />
-    <None Include="install.ps1" />
     <None Include="packages.config" />
-    <None Include="uninstall.ps1" />
   </ItemGroup>
   <Target Name="Clean">
     <RemoveDir Directories="$(SolutionDir)NuGetBuild" />
@@ -33,8 +31,6 @@
     <Copy SourceFiles="$(SolutionDir)AutoProperties\bin\$(Configuration)\portable40-net40+sl5+win8+wp8+wpa81\AutoProperties.dll" DestinationFolder="$(SolutionDir)NuGetBuild\lib\portable-net40+sl50+win+wpa81+wp80" />
     <Copy SourceFiles="$(SolutionDir)AutoProperties\bin\$(Configuration)\portable40-net40+sl5+win8+wp8+wpa81\AutoProperties.xml" DestinationFolder="$(SolutionDir)NuGetBuild\lib\portable-net40+sl50+win+wpa81+wp80" />
     <Copy SourceFiles="$(SolutionDir)NuGet\AutoProperties.Fody.nuspec" DestinationFolder="$(SolutionDir)NuGetBuild" />
-    <Copy SourceFiles="$(ProjectDir)install.ps1" DestinationFolder="$(SolutionDir)NuGetBuild\Tools" />
-    <Copy SourceFiles="$(ProjectDir)uninstall.ps1" DestinationFolder="$(SolutionDir)NuGetBuild\Tools" />
     <Copy SourceFiles="$(SolutionDir)AutoProperties.Fody\bin\$(ConfigurationName)\net46\AutoProperties.Fody.dll" DestinationFolder="$(SolutionDir)NuGetBuild" />
     <Copy SourceFiles="$(SolutionDir)AutoProperties.Fody\bin\$(ConfigurationName)\net46\AutoProperties.Fody.pdb" DestinationFolder="$(SolutionDir)NuGetBuild" />
     <PepitaPackage.CreatePackageTask NuGetBuildDirectory="$(SolutionDir)NuGetBuild" MetadataAssembly="$(SolutionDir)AutoProperties.Fody\bin\$(ConfigurationName)\net46\AutoProperties.Fody.dll" />

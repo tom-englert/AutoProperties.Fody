@@ -70,8 +70,6 @@ namespace Tests
                 var weavingTask = new ModuleWeaver
                 {
                     ModuleDefinition = moduleDefinition,
-                    // ReSharper disable once AssignNullToNotNullAttribute
-                    AssemblyResolver = moduleDefinition.AssemblyResolver
                 };
 
                 weavingTask.LogErrorPoint += WeavingTask_LogErrorPoint;

@@ -8,9 +8,10 @@
     <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FodyCecil" Version="2.3.23">
+    <PackageReference Include="FodyCecil" Version="3.0.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="FodyHelpers" Version="3.0.1" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
   </ItemGroup>
   <ItemGroup>

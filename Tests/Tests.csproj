@@ -29,15 +29,15 @@
     <ProjectReference Include="..\TestLibrary\TestLibrary.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FodyCecil" Version="2.3.23">
+    <PackageReference Include="FodyCecil" Version="3.0.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
     <PackageReference Include="NUnit" Version="3.7.1" />
-    <PackageReference Include="TomsToolbox.Core" Version="1.0.64" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.1.11" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />
+    <PackageReference Include="TomsToolbox.Core" Version="1.0.67" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.2.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.2.1" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />

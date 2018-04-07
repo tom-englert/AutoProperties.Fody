@@ -12,10 +12,10 @@ namespace AutoProperties.Fody
     [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
     internal class SystemReferences
     {
-        public SystemReferences([NotNull] ModuleDefinition moduleDefinition, [NotNull] IAssemblyResolver assemblyResolver)
+        public SystemReferences([NotNull] ModuleDefinition moduleDefinition)
         {
             var assemblies = new[] { "mscorlib", "System", "System.Reflection", "System.Runtime", "netstandard" };
-            var coreTypes = assemblies.SelectMany(assembly => GetTypes(assemblyResolver, assembly)).ToArray();
+            var coreTypes = assemblies.SelectMany(assembly => GetTypes(moduleDefinition.AssemblyResolver, assembly)).ToArray();
 
             var fieldInfoType = coreTypes.First(x => x.Name == "FieldInfo");
             GetFieldFromHandle = moduleDefinition.ImportReference(fieldInfoType.Methods
