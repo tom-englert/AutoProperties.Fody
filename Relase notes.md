@@ -1,3 +1,6 @@
+**1.10.0.0**
+- Fix #5: Update to use Fody3
+
 **1.9.0.0**
 - Fix #4: Support NetStandard projects
 
