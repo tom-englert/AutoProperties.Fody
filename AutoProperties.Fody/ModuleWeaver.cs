@@ -34,6 +34,8 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
     {
         new PropertyAccessorWeaver(this).Execute();
         new BackingFieldAccessWeaver(ModuleDefinition, this).Execute();
+
+        CleanReferences();
     }
 
     public override IEnumerable<string> GetAssembliesForScanning()
@@ -42,6 +44,11 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
     }
 
     public override bool ShouldCleanReference => true;
+
+    private void CleanReferences()
+    {
+        new ReferenceCleaner(ModuleDefinition, this).RemoveAttributes();
+    }
 
     void ILogger.LogDebug(string message)
     {
