@@ -6,37 +6,45 @@ using System.Linq;
 
 using JetBrains.Annotations;
 
-using NUnit.Framework;
-
 using Tests;
 
-[TestFixture]
+using Xunit;
+using Xunit.Abstractions;
+
 public class WeaverTests
 {
     [NotNull]
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    [NotNull]
     private readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
 
-    [Test]
+    public WeaverTests([NotNull] ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
+    [Fact]
     public void OutputWeaverErrors()
     {
         foreach (var message in _weaverHelper.Errors)
         {
-            TestContext.Out.WriteLine(message);
+            _testOutputHelper.WriteLine(message);
         }
 
-        Assert.AreEqual(10, _weaverHelper.Errors.Count);
+        Assert.Equal(10, _weaverHelper.Errors.Count);
     }
 
-    [Test]
+    [Fact]
     public void OutputWeaverMessages()
     {
         foreach (var message in _weaverHelper.Messages)
         {
-            TestContext.Out.WriteLine(message);
+            _testOutputHelper.WriteLine(message);
         }
     }
 
-    [Test]
+    [Fact]
     [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
     public void ValidatePropertyChangedIsInjected()
     {
@@ -49,11 +57,11 @@ public class WeaverTests
 
         instance.Property1 = "Test";
 
-        Assert.IsTrue(new[] { "Property1" }.SequenceEqual(calls));
+        Assert.True(new[] { "Property1" }.SequenceEqual(calls));
     }
 
 #if (DEBUG)
-    [Test]
+    [Fact]
     public void PeVerify()
     {
         Verifier.Verify(_weaverHelper.OriginalAssemblyPath, _weaverHelper.NewAssemblyPath);

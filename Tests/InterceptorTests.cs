@@ -5,139 +5,147 @@ using System.Reflection;
 
 using JetBrains.Annotations;
 
-using NUnit.Framework;
-
 using Tests;
+
+using Xunit;
+using Xunit.Abstractions;
 
 public class InterceptorTests
 {
     [NotNull]
-    private readonly Assembly assembly = WeaverHelper.Create().Assembly;
+    private readonly ITestOutputHelper _testOutputHelper;
+    [NotNull]
+    private readonly Assembly _assembly = WeaverHelper.Create().Assembly;
 
-    [Test]
-    [TestCase("ClassWithSimpleInterceptors", 1, "44!")]
-    [TestCase("ClassWithGenericInterceptors", 1)]
-    [TestCase("ClassWithMixedInterceptors", 1)]
-    [TestCase("ClassWithExternalInterceptorsBase", 0)]
-    [TestCase("ClassWithExternalGenericInterceptorsBase", 0)]
-    [TestCase("ClassWithReadonlyProperty", 1, "44")]
-    [TestCase("ClassDerivedFromClassWithAbstractProperty", 0)]
+    public InterceptorTests([NotNull] ITestOutputHelper testOutputHelper)
+    {
+        _testOutputHelper = testOutputHelper;
+    }
+
+    [Theory]
+    [InlineData("ClassWithSimpleInterceptors", 1, "44!")]
+    [InlineData("ClassWithGenericInterceptors", 1)]
+    [InlineData("ClassWithMixedInterceptors", 1)]
+    [InlineData("ClassWithExternalInterceptorsBase", 0)]
+    [InlineData("ClassWithExternalGenericInterceptorsBase", 0)]
+    [InlineData("ClassWithReadonlyProperty", 1, "44")]
+    [InlineData("ClassDerivedFromClassWithAbstractProperty", 0)]
     public void SimpleInterceptorTest([NotNull] string className, int expectedNumberOfFields, [CanBeNull] string property3Value = null)
     {
-        var target = assembly.GetInstance(className);
+        var target = _assembly.GetInstance(className);
 
-        Assert.AreEqual(42, target.Property1);
-        Assert.AreEqual("42", target.Property2);
+        Assert.Equal(42, target.Property1);
+        Assert.Equal("42", target.Property2);
 
         target.Property1 = 43;
 
-        Assert.AreEqual(43, target.Property1);
-        Assert.AreEqual("43", target.Property2);
+        Assert.Equal(43, target.Property1);
+        Assert.Equal("43", target.Property2);
 
         target.Property2 = "44";
 
-        Assert.AreEqual(44, target.Property1);
-        Assert.AreEqual("44", target.Property2);
+        Assert.Equal(44, target.Property1);
+        Assert.Equal("44", target.Property2);
 
         if (property3Value != null)
         {
-            Assert.AreEqual(property3Value, target.Property3);
+            Assert.Equal(property3Value, target.Property3);
         }
 
         // verify: backing fields should have been removed if interceptor does not contain a FieldInfo parameter
-        Assert.AreEqual(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
+        Assert.Equal(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
     }
 
-    [Test]
-    [TestCase("ClassWithGenericInterceptorsAndFieldReference", 2)]
-    [TestCase("ClassWithInterceptorsUsingAllPossibleParameters", 2)]
-    [TestCase("ClassWithMixedGenericInterceptorsAndFieldReference", 2)]
+    [Theory]
+    [InlineData("ClassWithGenericInterceptorsAndFieldReference", 2)]
+    [InlineData("ClassWithInterceptorsUsingAllPossibleParameters", 2)]
+    [InlineData("ClassWithMixedGenericInterceptorsAndFieldReference", 2)]
     public void WithBackingFieldAccessTest([NotNull] string className, int expectedNumberOfFields, [CanBeNull] string property3Value = null)
     {
-        var target = assembly.GetInstance(className);
+        var target = _assembly.GetInstance(className);
 
-        Assert.AreEqual(8, target.Property1);
-        Assert.AreEqual("9", target.Property2);
+        Assert.Equal(8, target.Property1);
+        Assert.Equal("9", target.Property2);
 
         target.Property1 = 42;
 
-        Assert.AreEqual(45, target.Property1);
-        Assert.AreEqual("9", target.Property2);
+        Assert.Equal(45, target.Property1);
+        Assert.Equal("9", target.Property2);
 
         target.Property2 = "44";
 
-        Assert.AreEqual(45, target.Property1);
-        Assert.AreEqual("47", target.Property2);
+        Assert.Equal(45, target.Property1);
+        Assert.Equal("47", target.Property2);
 
         if (property3Value != null)
         {
-            Assert.AreEqual(property3Value, target.Property3);
+            Assert.Equal(property3Value, target.Property3);
         }
 
         // verify: backing fields should have been removed if interceptor does not contain a FieldInfo parameter
-        Assert.AreEqual(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
+        Assert.Equal(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
     }
 
-    [Test]
-    [TestCase("DerivedFromBaseWithPrivateInterceptors", 2)]
-    [TestCase("ClassWithDoubleInterceptors", 3)]
-    [TestCase("ClassWithMissingGetInterceptor", 3)]
-    [TestCase("ClassWithBadGenericInterceptors", 3)]
-    [TestCase("ClassWithUnsupportedParameter", 3)]
-    [TestCase("ClassWithInterceptorAndInitializedAutoProperties", 3)]
-    [TestCase("ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties", 3)]
-    [TestCase("ClassWithBadReturnTypeInGetter", 3)]
-    [TestCase("ClassWithBadReturnTypeInGenericGetter", 3)]
-    [TestCase("ClassWithBadReturnTypeInSetter", 3)]
+    [Theory]
+    [InlineData("DerivedFromBaseWithPrivateInterceptors", 2)]
+    [InlineData("ClassWithDoubleInterceptors", 3)]
+    [InlineData("ClassWithMissingGetInterceptor", 3)]
+    [InlineData("ClassWithBadGenericInterceptors", 3)]
+    [InlineData("ClassWithUnsupportedParameter", 3)]
+    [InlineData("ClassWithInterceptorAndInitializedAutoProperties", 3)]
+    [InlineData("ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties", 3)]
+    [InlineData("ClassWithBadReturnTypeInGetter", 3)]
+    [InlineData("ClassWithBadReturnTypeInGenericGetter", 3)]
+    [InlineData("ClassWithBadReturnTypeInSetter", 3)]
     public void BadImplementationInterceptorTest([NotNull] string className, int expectedNumberOfFields)
     {
-        var target = assembly.GetInstance(className);
+        var target = _assembly.GetInstance(className);
 
-        Assert.AreEqual(7, target.Property1);
-        Assert.AreEqual("8", target.Property2);
+        Assert.Equal(7, target.Property1);
+        Assert.Equal("8", target.Property2);
 
         target.Property1 = 43;
 
-        Assert.AreEqual(43, target.Property1);
-        Assert.AreEqual("8", target.Property2);
+        Assert.Equal(43, target.Property1);
+        Assert.Equal("8", target.Property2);
 
         target.Property2 = "44";
 
-        Assert.AreEqual(43, target.Property1);
-        Assert.AreEqual("44", target.Property2);
+        Assert.Equal(43, target.Property1);
+        Assert.Equal("44", target.Property2);
 
         // verify: backing fields are not removed
-        Assert.AreEqual(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
+        Assert.Equal(expectedNumberOfFields, ((object)target).GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Length);
     }
 
-    [Test]
+    [Fact]
     public void ReadOnlyPropertiesTest()
     {
-        var target = assembly.GetInstance("ClassWithReadonlyPropertiesAndOnlyGetInterceptor");
+        var target = _assembly.GetInstance("ClassWithReadonlyPropertiesAndOnlyGetInterceptor");
 
-        Assert.AreEqual(42, target.Property1);
-        Assert.AreEqual("42", target.Property2);
+        Assert.Equal(42, target.Property1);
+        Assert.Equal("42", target.Property2);
     }
 
-    [Test]
-    [TestCase("SubClassWithPropertyOverride")]
-    [TestCase("SubClassWithVirtualPropertyOverride")]
+    [Theory]
+    [InlineData("SubClassWithPropertyOverride")]
+    [InlineData("SubClassWithVirtualPropertyOverride")]
     public void SubClassWithPropertyOverrideTest([NotNull] string className)
     {
-        var target = assembly.GetInstance(className);
+        var target = _assembly.GetInstance(className);
     }
 
-    [Test]
+    [Fact]
     public void RemoteTests()
     {
         var catalog = new AggregateCatalog();
         var container = new CompositionContainer(catalog);
 
-        var baseDirectory = Path.GetDirectoryName(assembly.Location);
+        var baseDirectory = Path.GetDirectoryName(_assembly.Location);
         Assembly.LoadFrom(Path.Combine(baseDirectory, "TestLibrary.dll"));
         Assembly.LoadFrom(Path.Combine(baseDirectory, "AutoProperties.dll"));
 
-        catalog.Catalogs.Add(new AssemblyCatalog(assembly));
+        catalog.Catalogs.Add(new AssemblyCatalog(_assembly));
 
         var actions = container.GetExportedValues<Action>();
 
@@ -145,7 +153,7 @@ public class InterceptorTests
         {
             var method = action.Method;
 
-            TestContext.Out.WriteLine($"Run {method.DeclaringType.Name}.{method.Name}");
+            _testOutputHelper.WriteLine($"Run {method.DeclaringType.Name}.{method.Name}");
             action();
         }
 

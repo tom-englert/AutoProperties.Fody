@@ -10,8 +10,6 @@ using JetBrains.Annotations;
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-using NUnit.Framework;
-
 using TomsToolbox.Core;
 
 namespace Tests
@@ -52,7 +50,7 @@ namespace Tests
         {
             // ReSharper disable once AssignNullToNotNullAttribute
             // ReSharper disable once PossibleNullReferenceException
-            var projectDir = Path.GetFullPath(Path.Combine(TestContext.CurrentContext.TestDirectory, $@"..\..\..\..\{assemblyName}"));
+            var projectDir = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(new Uri(typeof(WeaverHelper).Assembly.CodeBase).LocalPath), $@"..\..\..\..\{assemblyName}"));
 
             ;
             var binaryDir = Path.Combine(projectDir, @"bin", Configuration, framework);

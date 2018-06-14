@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 using AutoProperties.Fody;
@@ -7,13 +8,21 @@ using AutoProperties.Fody;
 using Mono.Cecil;
 using Mono.Cecil.Rocks;
 
-using NUnit.Framework;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace CecilTests
 {
     public class GenericsTests
     {
-        [Test]
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public GenericsTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
+        [Fact]
         public void GenericTest()
         {
             var module = ModuleDefinition.ReadModule(typeof(GenericsTests).Assembly.Location);
@@ -23,13 +32,12 @@ namespace CecilTests
                 var expected = type.CustomAttributes.Select(ca => ca.ConstructorArguments.FirstOrDefault().Value as string).FirstOrDefault();
                 if (expected != null)
                 {
-                    TestContext.Out.WriteLine(type);
-                    TestContext.Out.Flush();
+                    _testOutputHelper.WriteLine(type.ToString());
 
                     var method = module.ImportReference(type.GetSelfAndBaseTypes().Select(t => t.GetMethods().FirstOrDefault(m => m.Name == "Method")).FirstOrDefault(m => m != null));
 
                     var methodReference = method.GetReference(type);
-                    Assert.AreEqual(expected, methodReference.ToString());
+                    Assert.Equal(expected, methodReference.ToString());
                 }
             }
         }

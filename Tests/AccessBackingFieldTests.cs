@@ -7,51 +7,51 @@ using System.Reflection;
 
 using JetBrains.Annotations;
 
-using NUnit.Framework;
-
 using Tests;
+
+using Xunit;
 
 public class AccessBackingFieldTests
 {
     [NotNull]
     private readonly Assembly assembly = WeaverHelper.Create().Assembly;
 
-    [Test]
+    [Theory]
     // default behavior (baseline)
-    [TestCase("ClassWithInlineInitializedAutoProperties", 
+    [InlineData("ClassWithInlineInitializedAutoProperties", 
         "Test", "Test2", false, new string[0])]
-    [TestCase("ClassWithExplicitInitializedAutoProperties", 
+    [InlineData("ClassWithExplicitInitializedAutoProperties", 
         "Test", "Test2", true, new[]{ "IsChanged", "Property1", "Property2" })]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign", 
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2", "Property1", "Property2", "Property3" })]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign", 
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2", "Property3" })]
-    [TestCase("ClassWithAutoPropertiesInitializedInSeparateMethod", 
+    [InlineData("ClassWithAutoPropertiesInitializedInSeparateMethod", 
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
-    [TestCase("ClassWithExplicitInitializedBackingFieldProperties", 
+    [InlineData("ClassWithExplicitInitializedBackingFieldProperties", 
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
     // with class level [BypassAutoPropertySettersInConstructors(true)]
-    [TestCase("ClassWithInlineInitializedAutoPropertiesAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithInlineInitializedAutoPropertiesAndBypassAutoPropertySetters", 
         "Test", "Test2", false, new string[0])]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySetters", 
         "Test", "Test2", false, new string[0])]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesignAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesignAndBypassAutoPropertySetters", 
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2" })]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesignAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesignAndBypassAutoPropertySetters", 
         "test", "test2", false, new string[0])]
-    [TestCase("ClassWithAutoPropertiesInitializedInSeparateMethodAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithAutoPropertiesInitializedInSeparateMethodAndBypassAutoPropertySetters", 
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
-    [TestCase("ClassWithExplicitInitializedBackingFieldPropertiesAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedBackingFieldPropertiesAndBypassAutoPropertySetters", 
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
     // with .SetBackingField..
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySetters",
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySetters",
         "Test", "Test2", false, new string[0])]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithVariableParameters",
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithVariableParameters",
         "Test2A", "Test2", false, new string[0])]
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter",
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter",
         "Test", "Test2", false, new string[0])]
     // with class level [BypassAutoPropertySettersInConstructors(true)] and .SetProperty...
-    [TestCase("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySettersAndExplicitSetProperty1",
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySettersAndExplicitSetProperty1",
         "Test", "Test2", true, new[] { "IsChanged", "Property1" })]
 
     public void Test([NotNull] string className, [CanBeNull] string property1Value, [CanBeNull] string property2Value, bool isChangedStateAfterConstructor, [NotNull, ItemNotNull] string[] expectedPropertyChangedCallsInConstructor)
@@ -64,34 +64,34 @@ public class AccessBackingFieldTests
             eventCount++;
         };
 
-        Assert.AreEqual(property1Value, instance.Property1);
-        Assert.AreEqual(property2Value, instance.Property2);
+        Assert.Equal(property1Value, instance.Property1);
+        Assert.Equal(property2Value, instance.Property2);
 
         var actualPropertyChangedCalls = (IList<string>)instance.PropertyChangedCalls;
         Debug.WriteLine("PropertyChanged calls: " + string.Join(", ", actualPropertyChangedCalls));
 
-        Assert.IsTrue(expectedPropertyChangedCallsInConstructor.SequenceEqual(actualPropertyChangedCalls));
-        Assert.AreEqual(isChangedStateAfterConstructor, instance.IsChanged);
+        Assert.True(expectedPropertyChangedCallsInConstructor.SequenceEqual(actualPropertyChangedCalls));
+        Assert.Equal(isChangedStateAfterConstructor, instance.IsChanged);
 
         var initial = isChangedStateAfterConstructor ? 1 : 2;
 
         instance.Property1 = "a";
-        Assert.AreEqual(initial, eventCount);
-        Assert.IsTrue(instance.IsChanged);
+        Assert.Equal(initial, eventCount);
+        Assert.True(instance.IsChanged);
 
         instance.IsChanged = false;
-        Assert.AreEqual(initial + 1, eventCount);
+        Assert.Equal(initial + 1, eventCount);
 
         instance.Property2 = "b";
-        Assert.AreEqual(initial + 3, eventCount);
-        Assert.IsTrue(instance.IsChanged);
+        Assert.Equal(initial + 3, eventCount);
+        Assert.True(instance.IsChanged);
     }
 
-    [Test]
+    [Fact]
     public void DerivedClassWithoutAutoPropertyTweakingCrashesTest()
     {
         // ReSharper disable PossibleNullReferenceException
-        Assert.Throws(Is.TypeOf<TargetInvocationException>().And.InnerException.TypeOf<NullReferenceException>(), () =>
+        Assert.Throws<TargetInvocationException>(() =>
         {
             assembly.GetInstance("DerivedClassWithExplicitInitializedAutoProperties");
         });

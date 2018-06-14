@@ -1,12 +1,10 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 
 using AutoProperties;
-using NUnit.Framework;
-using NUnit.Framework.Internal;
+
+using Xunit;
 
 namespace AssemblyToProcess
 {
@@ -71,16 +69,16 @@ namespace AssemblyToProcess
         public static void Run()
         {
             var one = new One();
-            Assert.IsTrue(one.Test); 
+            Assert.True(one.Test); 
 
             var two = new Two<object>();
-            Assert.IsTrue(two.Test); 
+            Assert.True(two.Test); 
 
             var three = new Three();
-            Assert.IsFalse(three.Test); // => interceptors of base class are private!
+            Assert.False(three.Test); // => interceptors of base class are private!
 
             var four = new Four();
-            Assert.IsTrue(four.Test);
+            Assert.True(four.Test);
         }
     }
 
@@ -94,7 +92,7 @@ namespace AssemblyToProcess
         [GetInterceptor]
         protected object GetValue(PropertyInfo propertyInfo)
         {
-            Assert.IsNotNull(propertyInfo);
+            Assert.NotNull(propertyInfo);
             return true;
         }
 
@@ -110,7 +108,7 @@ namespace AssemblyToProcess
             var t = typeof(TestExplicit).GetProperty("AssemblyToProcess.ITestExplicit.Test", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
             var testExplicit = new TestExplicit();
-            Assert.IsTrue(((ITestExplicit) testExplicit).Test); // throws
+            Assert.True(((ITestExplicit) testExplicit).Test); // throws
         }
     }
 }
