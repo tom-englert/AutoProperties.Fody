@@ -344,7 +344,7 @@ namespace AutoProperties.Fody
                             Instruction.Create(OpCodes.Ldtoken, declaringType.GetReference()),
                             Instruction.Create(OpCodes.Call, _systemReferences.GetTypeFromHandle),
                             Instruction.Create(OpCodes.Ldstr, _property.Name),
-                            Instruction.Create(OpCodes.Ldc_I4, (int)(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)),
+                            Instruction.Create(OpCodes.Ldc_I4, (int)(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly)),
                             Instruction.Create(OpCodes.Call, getPropertyInfo),
                             Instruction.Create(OpCodes.Stsfld, _propertyInfo));
 

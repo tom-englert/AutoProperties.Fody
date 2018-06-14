@@ -476,3 +476,49 @@ public class ClassWithBadReturnTypeInSetter
 
     public string Property2 { get; set; }
 }
+
+public class BaseClassWithInterceptors
+{
+    public BaseClassWithInterceptors Prop { get; set; }
+
+    [GetInterceptor]
+    protected T GetInterceptor<T>(PropertyInfo propInfo, ref T fieldValue)
+    {
+        return fieldValue;
+    }
+
+    [SetInterceptor]
+    protected void SetInterceptor<T>(PropertyInfo propInfo, ref T fieldValue, T newValue)
+    {
+        fieldValue = newValue;
+    }
+}
+
+
+public class SubClassWithPropertyOverride : BaseClassWithInterceptors
+{
+    public new SubClassWithPropertyOverride Prop { get; set; }
+}
+
+public class BaseClassWithVirtualProperty
+{
+    public virtual int Prop { get; set; }
+
+    [GetInterceptor]
+    protected T GetInterceptor<T>(PropertyInfo propInfo, ref T fieldValue)
+    {
+        return fieldValue;
+    }
+
+    [SetInterceptor]
+    protected void SetInterceptor<T>(PropertyInfo propInfo, ref T fieldValue, T newValue)
+    {
+        fieldValue = newValue;
+    }
+}
+
+
+public class SubClassWithVirtualPropertyOverride : BaseClassWithVirtualProperty
+{
+    public override int Prop { get; set; }
+}

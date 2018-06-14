@@ -33,6 +33,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
+    <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
     <PackageReference Include="NUnit" Version="3.7.1" />
     <PackageReference Include="TomsToolbox.Core" Version="1.0.67" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.0" />

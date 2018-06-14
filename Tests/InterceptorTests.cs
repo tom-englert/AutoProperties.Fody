@@ -120,6 +120,14 @@ public class InterceptorTests
     }
 
     [Test]
+    [TestCase("SubClassWithPropertyOverride")]
+    [TestCase("SubClassWithVirtualPropertyOverride")]
+    public void SubClassWithPropertyOverrideTest([NotNull] string className)
+    {
+        var target = assembly.GetInstance(className);
+    }
+
+    [Test]
     public void RemoteTests()
     {
         var catalog = new AggregateCatalog();
