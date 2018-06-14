@@ -1,3 +1,6 @@
+**1.11.0.0**
+- Fix #1: AmbiguousMatchException when subclass hides an inherited property of different type
+
 **1.10.0.0**
 - Fix #5: Update to use Fody3
 
