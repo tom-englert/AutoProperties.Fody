@@ -154,9 +154,11 @@ public class ClassWithGenericInterceptorsAndFieldReference
         field = (T)Convert.ChangeType(Convert.ToInt32(value) + 2, typeof(T));
     }
 
-    public int Property1 { get; set; } = 7;
+    public int Property1 { get; set; } = GetDefault() + 1;
 
     public string Property2 { get; set; } = "8";
+
+    private static int GetDefault() => 6;
 }
 
 public class ClassWithMixedGenericInterceptorsAndFieldReference
@@ -336,27 +338,6 @@ public class ClassWithUnsupportedParameter
     public string Property2 { get; set; }
 }
 
-public class ClassWithInterceptorAndInitializedAutoProperties
-{
-    private int _field = 42;
-
-    [GetInterceptor]
-    private object GetInterceptor(string propertyName, Type propertyType)
-    {
-        return Convert.ChangeType(_field, propertyType);
-    }
-
-    [SetInterceptor]
-    private void SetInterceptor(object value, string propertyName)
-    {
-        _field = Convert.ToInt32(value);
-    }
-
-    public int Property1 { get; set; } = 7;
-
-    public string Property2 { get; set; } = "8";
-}
-
 public class ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties
 {
     private int _field = 42;
@@ -494,7 +475,6 @@ public class BaseClassWithInterceptors
     }
 }
 
-
 public class SubClassWithPropertyOverride : BaseClassWithInterceptors
 {
     public new SubClassWithPropertyOverride Prop { get; set; }
@@ -516,7 +496,6 @@ public class BaseClassWithVirtualProperty
         fieldValue = newValue;
     }
 }
-
 
 public class SubClassWithVirtualPropertyOverride : BaseClassWithVirtualProperty
 {

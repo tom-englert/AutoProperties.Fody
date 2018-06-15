@@ -32,7 +32,7 @@ public class WeaverTests
             _testOutputHelper.WriteLine(message);
         }
 
-        Assert.Equal(10, _weaverHelper.Errors.Count);
+        Assert.Equal(12, _weaverHelper.Errors.Count);
     }
 
     [Fact]
@@ -60,11 +60,9 @@ public class WeaverTests
         Assert.True(new[] { "Property1" }.SequenceEqual(calls));
     }
 
-#if (DEBUG)
     [Fact]
     public void PeVerify()
     {
         Verifier.Verify(_weaverHelper.OriginalAssemblyPath, _weaverHelper.NewAssemblyPath);
     }
-#endif
 }

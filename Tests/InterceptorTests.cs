@@ -64,13 +64,13 @@ public class InterceptorTests
     {
         var target = _assembly.GetInstance(className);
 
-        Assert.Equal(8, target.Property1);
-        Assert.Equal("9", target.Property2);
+        Assert.Equal(10, target.Property1);
+        Assert.Equal("11", target.Property2);
 
         target.Property1 = 42;
 
         Assert.Equal(45, target.Property1);
-        Assert.Equal("9", target.Property2);
+        Assert.Equal("11", target.Property2);
 
         target.Property2 = "44";
 
@@ -92,7 +92,6 @@ public class InterceptorTests
     [InlineData("ClassWithMissingGetInterceptor", 3)]
     [InlineData("ClassWithBadGenericInterceptors", 3)]
     [InlineData("ClassWithUnsupportedParameter", 3)]
-    [InlineData("ClassWithInterceptorAndInitializedAutoProperties", 3)]
     [InlineData("ClassWithInterceptorAndInitializedAutoPropertiesAndIgnoredPropties", 3)]
     [InlineData("ClassWithBadReturnTypeInGetter", 3)]
     [InlineData("ClassWithBadReturnTypeInGenericGetter", 3)]

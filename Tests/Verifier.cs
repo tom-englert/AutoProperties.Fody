@@ -13,8 +13,9 @@ public static class Verifier
     {
         var before = Validate(beforeAssemblyPath);
         var after = Validate(afterAssemblyPath);
-        // var message = $"Failed processing {Path.GetFileName(afterAssemblyPath)}\r\n{after}";
-        Assert.Equal(TrimLineNumbers(before), TrimLineNumbers(after));
+        var message = $"Failed processing {Path.GetFileName(afterAssemblyPath)}\r\n{after}";
+
+        Assert.True(TrimLineNumbers(before) == TrimLineNumbers(after), message);
     }
 
     [NotNull]

@@ -68,7 +68,9 @@ public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoProp
 
 public class ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter : ObservableObject
 {
+#pragma warning disable 649
     private bool _x;
+#pragma warning restore 649
 
     public ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySettersWithComplexParameter()
     {
@@ -148,7 +150,7 @@ public class ClassWithSimpleInterceptors
         _field = Convert.ToInt32(value);
     }
 
-    public int Property1 { get; set; }
+    public int Property1 { get; set; } = 7;
 
     public string Property2 { get; set; }
 

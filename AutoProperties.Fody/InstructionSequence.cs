@@ -12,7 +12,7 @@ using Mono.Cecil.Cil;
 namespace AutoProperties.Fody
 {
     /// <summary>
-    /// A list of instructions belonging to the same sequence point. This is just a view wrapping the original list, modifications will be forwarded to the original list. 
+    /// A list of instructions belonging to the same sequence point. This is just a view wrapping the original list, modifications will be forwarded to the original list.
     /// </summary>
     internal class InstructionSequence : IList<Instruction>
     {

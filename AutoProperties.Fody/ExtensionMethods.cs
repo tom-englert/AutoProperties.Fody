@@ -164,9 +164,65 @@ namespace AutoProperties.Fody
             return method.Body?.Instructions?.Any(inst => inst?.Operand == member) ?? false;
         }
 
+        public static void ReplaceFieldAccessWithPropertySetter([NotNull] this MethodDefinition constructor, [NotNull] IMemberDefinition field, [NotNull] PropertyDefinition property, [CanBeNull] ISymbolReader symbolReader)
+        {
+            var setMethod = property.SetMethod;
+            if (setMethod == null)
+                return;
+
+            // field initializers are called before the call to the base constructor, but property setters must be called after!
+
+            var instructions = constructor.Body?.Instructions;
+            if (instructions == null)
+                return;
+
+            var instructionSequences = new InstructionSequences(instructions, symbolReader?.Read(constructor)?.SequencePoints);
+
+            var newInstructions = new List<Instruction>();
+
+            foreach (var sequence in instructionSequences)
+            {
+                for (var i = 0; i < sequence.Count; i++)
+                {
+                    var instruction = sequence[i];
+
+                    if ((instruction.OpCode != OpCodes.Stfld) || (instruction.Operand != field) || (i < 2))
+                        continue;
+
+                    sequence[i] = Instruction.Create(OpCodes.Call, setMethod);
+                    newInstructions.AddRange(sequence.Take(i + 1));
+
+                    for (var k = 0; k <= i; k++)
+                    {
+                        sequence.RemoveAt(0);
+                    }
+
+                    break;
+                }
+            }
+
+            var index = instructions.TakeWhile(inst => !inst.IsBaseConstructorCall(constructor)).Count() + 1;
+
+            if (index <= instructions.Count)
+            {
+                instructions.InsertRange(index, newInstructions.ToArray());
+            }
+        }
+
+        private static bool IsBaseConstructorCall([NotNull] this Instruction instruction, [NotNull] MethodDefinition constructor)
+        {
+            return (instruction.OpCode == OpCodes.Call)
+                   && (instruction.Operand is MethodReference targetMethod)
+                   && (targetMethod.Name == ".ctor")
+                   && (targetMethod.DeclaringType == constructor.DeclaringType?.BaseType);
+        }
+
         [NotNull]
         public static FieldReference GetReference([NotNull] this FieldDefinition field)
         {
+            if (field.IsInitOnly)
+                throw new WeavingException($"Can't use a reference to a read only field: {field}");
+
             var declaringType = field.DeclaringType;
 
             if (!declaringType.HasGenericParameters)

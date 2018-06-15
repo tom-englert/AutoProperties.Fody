@@ -253,7 +253,14 @@ namespace AutoProperties.Fody
                         continue;
                     }
 
-                    new PropertyWeaver(this, property).Execute(getInterceptor, setInterceptor);
+                    try
+                    {
+                        new PropertyWeaver(this, property).Execute(getInterceptor, setInterceptor);
+                    }
+                    catch (WeavingException ex)
+                    {
+                        _logger.LogError($"Error intercepting {property}: {ex.Message}", ex.Method);
+                    }
                 }
             }
 
@@ -300,6 +307,11 @@ namespace AutoProperties.Fody
 
                     var newGetter = BuildGetter(backingField, getInterceptor);
                     var newSetter = BuildSetter(backingField, setInterceptor);
+
+                    foreach (var constructor in _classDefinition.GetConstructors())
+                    {
+                        constructor.ReplaceFieldAccessWithPropertySetter(backingField, _property, _classWeaver._weaver._moduleDefinition.SymbolReader);
+                    }
 
                     if (!_isBackingFieldAccessed)
                     {

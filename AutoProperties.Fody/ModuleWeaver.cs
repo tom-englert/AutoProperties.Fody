@@ -18,8 +18,6 @@ using Mono.Cecil.Cil;
 
 public class ModuleWeaver : BaseModuleWeaver, ILogger
 {
-    private bool _hasErrors;
-
     [NotNull]
     internal SystemReferences SystemReferences => new SystemReferences(ModuleDefinition);
 
@@ -67,8 +65,6 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
 
     void ILogger.LogError(string message, SequencePoint sequencePoint)
     {
-        _hasErrors = true;
-
         if (sequencePoint != null)
         {
             LogErrorPoint(message, sequencePoint);
