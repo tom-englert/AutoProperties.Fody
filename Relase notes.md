@@ -1,3 +1,6 @@
+**1.12.0.0**
+- Fix #6: Set interceptor is not invoked by auto property initializer
+
 **1.11.0.0**
 - Fix #7: AmbiguousMatchException when subclass hides an inherited property of different type
 
