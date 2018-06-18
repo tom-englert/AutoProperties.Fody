@@ -1,3 +1,6 @@
+**1.13.0.0**
+- Fine-tune #6 to support get-only properties.
+
 **1.12.0.0**
 - Fix #6: Set interceptor is not invoked by auto property initializer
 
