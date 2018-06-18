@@ -220,8 +220,8 @@ namespace AutoProperties.Fody
         [NotNull]
         public static FieldReference GetReference([NotNull] this FieldDefinition field)
         {
-            if (field.IsInitOnly)
-                throw new WeavingException($"Can't use a reference to a read only field: {field}");
+            // Make the backing field - even of get-only properties - accessible by the interceptors...
+            field.IsInitOnly = false;
 
             var declaringType = field.DeclaringType;
 

@@ -478,6 +478,8 @@ public class BaseClassWithInterceptors
 public class SubClassWithPropertyOverride : BaseClassWithInterceptors
 {
     public new SubClassWithPropertyOverride Prop { get; set; }
+
+    public string ReadOnlyProperty { get; }
 }
 
 public class BaseClassWithVirtualProperty
