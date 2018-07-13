@@ -92,6 +92,9 @@ public class MyConfiguration
     }
 
     public string Property { get; set; }
+
+    [InterceptIgnore]
+    public string UntouchedProperty { get; set; }
 }
 ```
 
@@ -123,6 +126,8 @@ public class MyConfiguration
             this.SetValue<string>(nameof(Property), typeof(string), MyConfiguration.<Property>k__PropertyInfo, FieldInfo.GetFieldFromHandle(__fieldref(MyConfiguration.<Property>k__BackingField)), (object)value, value, out this.<Property>k__BackingField);
         }
     }
+
+    public string UntouchedProperty { get; set; }
 }
 ```
 

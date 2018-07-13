@@ -1,3 +1,6 @@
+**1.14.0.0**
+- Fix #8: Hang at runtime if generic class uses property info in interceptor
+
 **1.13.0.0**
 - Fine-tune #6 to support get-only properties.
 
