@@ -358,7 +358,7 @@ namespace AutoProperties.Fody
                             Instruction.Create(OpCodes.Ldstr, _property.Name),
                             Instruction.Create(OpCodes.Ldc_I4, (int)(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly)),
                             Instruction.Create(OpCodes.Call, getPropertyInfo),
-                            Instruction.Create(OpCodes.Stsfld, _propertyInfo));
+                            Instruction.Create(OpCodes.Stsfld, _propertyInfo.GetReference()));
 
                         return _propertyInfo;
                     }
@@ -455,7 +455,7 @@ namespace AutoProperties.Fody
 
                                 case "System.Reflection.PropertyInfo":
                                     // ReSharper disable once ArrangeRedundantParentheses
-                                    yield return Instruction.Create(OpCodes.Ldsfld, PropertyInfo);
+                                    yield return Instruction.Create(OpCodes.Ldsfld, PropertyInfo.GetReference());
                                     break;
 
                                 case "System.Reflection.FieldInfo":

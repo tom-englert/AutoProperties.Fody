@@ -19,7 +19,6 @@ namespace AssemblyToProcess
         private void SetValue(string name) => throw new NotImplementedException();
     }
 
-
     public class Two<T>
     {
         public bool Test { get; set; }
@@ -31,7 +30,6 @@ namespace AssemblyToProcess
         private void SetValue(string name) => throw new NotImplementedException();
     }
 
-
     public class ThreeBase
     {
         [GetInterceptor]
@@ -41,12 +39,10 @@ namespace AssemblyToProcess
         protected void SetValue(string name) => throw new NotImplementedException();
     }
 
-
     public class Three : ThreeBase
     {
         public bool Test { get; set; }
     }
-
 
     public class FourBase<T>
     {
@@ -57,10 +53,36 @@ namespace AssemblyToProcess
         protected void SetValue(string name) => throw new NotImplementedException();
     }
 
-
     public class Four : FourBase<object>
     {
         public bool Test { get; set; }
+    }
+
+    public class Five<TClass>
+    {
+        // https://github.com/tom-englert/AutoProperties.Fody/issues/8
+
+        public int IntProp { get; set; }
+        public string StringProp { get; set; }
+        public TClass GenericProp { get; set; }
+
+        private int _backingField;
+        private static PropertyInfo _propertyInfo = typeof(Five<TClass>).GetProperty(nameof(ReferenceImplementation));
+
+        [InterceptIgnore]
+        public int ReferenceImplementation
+        {
+            get => GetInterceptor(_propertyInfo, ref _backingField);
+            set => SetInterceptor(_propertyInfo, ref _backingField, value);
+        }
+
+        [GetInterceptor]
+        protected T GetInterceptor<T>(PropertyInfo propInfo, ref T fieldValue)
+            => fieldValue;
+
+        [SetInterceptor]
+        protected void SetInterceptor<T>(PropertyInfo propInfo, ref T fieldValue, T newValue)
+            => fieldValue = newValue;
     }
 
     public static class GenericTests
@@ -69,16 +91,42 @@ namespace AssemblyToProcess
         public static void Run()
         {
             var one = new One();
-            Assert.True(one.Test); 
+            Assert.True(one.Test);
 
             var two = new Two<object>();
-            Assert.True(two.Test); 
+            Assert.True(two.Test);
 
             var three = new Three();
             Assert.False(three.Test); // => interceptors of base class are private!
 
             var four = new Four();
             Assert.True(four.Test);
+
+            {
+                var five = new Five<string>();
+
+                var strValue = five.StringProp;
+                five.StringProp = "asd";
+
+                var intValue = five.IntProp;
+                five.IntProp = 123;
+
+                var genericValue = five.GenericProp;
+                five.GenericProp = "123";
+            }
+
+            {
+                var five = new Five<int>();
+
+                var strValue = five.StringProp;
+                five.StringProp = "asd";
+
+                var intValue = five.IntProp;
+                five.IntProp = 123;
+
+                var genericValue = five.GenericProp;
+                five.GenericProp = 123;
+            }
         }
     }
 
@@ -108,7 +156,7 @@ namespace AssemblyToProcess
             var t = typeof(TestExplicit).GetProperty("AssemblyToProcess.ITestExplicit.Test", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
             var testExplicit = new TestExplicit();
-            Assert.True(((ITestExplicit) testExplicit).Test); // throws
+            Assert.True(((ITestExplicit)testExplicit).Test); // throws
         }
     }
 }
