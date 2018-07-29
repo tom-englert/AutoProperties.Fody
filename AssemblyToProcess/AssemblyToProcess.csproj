@@ -2,9 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-  </PropertyGroup>
-  <PropertyGroup>
     <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
+    <NoWarn>1701;1702;649</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\AutoProperties\AutoProperties.csproj" />
@@ -12,6 +11,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="Fody" Version="3.*">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="PropertyChanged.Fody" Version="2.*">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

@@ -67,7 +67,7 @@ namespace AssemblyToProcess
         public TClass GenericProp { get; set; }
 
         private int _backingField;
-        private static PropertyInfo _propertyInfo = typeof(Five<TClass>).GetProperty(nameof(ReferenceImplementation));
+        private static readonly PropertyInfo _propertyInfo = typeof(Five<TClass>).GetProperty(nameof(ReferenceImplementation));
 
         [InterceptIgnore]
         public int ReferenceImplementation

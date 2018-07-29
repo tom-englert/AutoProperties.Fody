@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Composition.Hosting;
-using System.IO;
 using System.Reflection;
 
 using JetBrains.Annotations;
@@ -139,10 +138,6 @@ public class InterceptorTests
     {
         var catalog = new AggregateCatalog();
         var container = new CompositionContainer(catalog);
-
-        var baseDirectory = Path.GetDirectoryName(_assembly.Location);
-        Assembly.LoadFrom(Path.Combine(baseDirectory, "TestLibrary.dll"));
-        Assembly.LoadFrom(Path.Combine(baseDirectory, "AutoProperties.dll"));
 
         catalog.Catalogs.Add(new AssemblyCatalog(_assembly));
 

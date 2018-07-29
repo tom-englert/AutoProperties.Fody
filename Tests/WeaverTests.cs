@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
@@ -32,7 +31,7 @@ public class WeaverTests
             _testOutputHelper.WriteLine(message);
         }
 
-        Assert.Equal(12, _weaverHelper.Errors.Count);
+        Assert.Equal(12, _weaverHelper.Errors.Count());
     }
 
     [Fact]
@@ -58,11 +57,5 @@ public class WeaverTests
         instance.Property1 = "Test";
 
         Assert.True(new[] { "Property1" }.SequenceEqual(calls));
-    }
-
-    [Fact]
-    public void PeVerify()
-    {
-        Verifier.Verify(_weaverHelper.OriginalAssemblyPath, _weaverHelper.NewAssemblyPath);
     }
 }

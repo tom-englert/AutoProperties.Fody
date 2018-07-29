@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 
 using AutoProperties;
+#pragma warning disable 649
 
 public class ClassWithExplicitInitializedAutoProperties : ObservableObject
 {
