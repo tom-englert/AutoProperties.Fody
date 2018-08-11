@@ -18,30 +18,30 @@ public class AccessBackingFieldTests
 
     [Theory]
     // default behavior (baseline)
-    [InlineData("ClassWithInlineInitializedAutoProperties", 
+    [InlineData("ClassWithInlineInitializedAutoProperties",
         "Test", "Test2", false, new string[0])]
-    [InlineData("ClassWithExplicitInitializedAutoProperties", 
+    [InlineData("ClassWithExplicitInitializedAutoProperties",
         "Test", "Test2", true, new[]{ "IsChanged", "Property1", "Property2" })]
-    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesign",
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2", "Property1", "Property2", "Property3" })]
-    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign",
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2", "Property3" })]
-    [InlineData("ClassWithAutoPropertiesInitializedInSeparateMethod", 
+    [InlineData("ClassWithAutoPropertiesInitializedInSeparateMethod",
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
-    [InlineData("ClassWithExplicitInitializedBackingFieldProperties", 
+    [InlineData("ClassWithExplicitInitializedBackingFieldProperties",
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
     // with class level [BypassAutoPropertySettersInConstructors(true)]
-    [InlineData("ClassWithInlineInitializedAutoPropertiesAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithInlineInitializedAutoPropertiesAndBypassAutoPropertySetters",
         "Test", "Test2", false, new string[0])]
-    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesAndBypassAutoPropertySetters",
         "Test", "Test2", false, new string[0])]
-    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesignAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedWeakDesignAndBypassAutoPropertySetters",
         "test", "test2", true, new[] { "IsChanged", "Property1", "Property2" })]
-    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesignAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedAutoPropertiesDerivedProperDesignAndBypassAutoPropertySetters",
         "test", "test2", false, new string[0])]
-    [InlineData("ClassWithAutoPropertiesInitializedInSeparateMethodAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithAutoPropertiesInitializedInSeparateMethodAndBypassAutoPropertySetters",
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
-    [InlineData("ClassWithExplicitInitializedBackingFieldPropertiesAndBypassAutoPropertySetters", 
+    [InlineData("ClassWithExplicitInitializedBackingFieldPropertiesAndBypassAutoPropertySetters",
         "Test", "Test2", true, new[] { "IsChanged", "Property1", "Property2" })]
     // with .SetBackingField..
     [InlineData("ClassWithExplicitInitializedAutoPropertiesAndExplicitBypassAutoPropertySetters",

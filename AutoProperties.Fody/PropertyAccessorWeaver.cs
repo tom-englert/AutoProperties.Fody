@@ -25,11 +25,11 @@ namespace AutoProperties.Fody
         [NotNull]
         private readonly ILogger _logger;
 
-        public PropertyAccessorWeaver([NotNull] ModuleWeaver moduleWeaver)
+        public PropertyAccessorWeaver([NotNull] ModuleWeaver moduleWeaver, [NotNull] SystemReferences systemReferences)
         {
             _logger = moduleWeaver;
             _moduleDefinition = moduleWeaver.ModuleDefinition;
-            _systemReferences = moduleWeaver.SystemReferences;
+            _systemReferences = systemReferences;
         }
 
         public void Execute()

@@ -18,19 +18,11 @@ using Mono.Cecil.Cil;
 
 public class ModuleWeaver : BaseModuleWeaver, ILogger
 {
-    [NotNull]
-    internal SystemReferences SystemReferences => new SystemReferences(ModuleDefinition);
-
-    public ModuleWeaver()
-    {
-        LogDebug = LogInfo = LogWarning = LogError = _ => { };
-        LogErrorPoint = (_, __) => { };
-        ModuleDefinition = ModuleDefinition.CreateModule("empty", ModuleKind.Dll);
-    }
-
     public override void Execute()
     {
-        new PropertyAccessorWeaver(this).Execute();
+        var systemReferences = new SystemReferences(this);
+
+        new PropertyAccessorWeaver(this, systemReferences).Execute();
         new BackingFieldAccessWeaver(ModuleDefinition, this).Execute();
 
         CleanReferences();
@@ -38,7 +30,7 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
 
     public override IEnumerable<string> GetAssembliesForScanning()
     {
-        yield break;
+        return new[] { "mscorlib", "System", "System.Reflection", "System.Runtime", "netstandard" };
     }
 
     public override bool ShouldCleanReference => true;
