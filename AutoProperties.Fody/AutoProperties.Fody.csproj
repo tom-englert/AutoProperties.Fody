@@ -15,6 +15,7 @@
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\FodyTools\FodyTools\SystemReferenceExtensionsMethods.cs" Link="SystemReferenceExtensionsMethods.cs" />
     <Compile Include="..\Trademark.cs">
       <Link>Trademark.cs</Link>
     </Compile>
