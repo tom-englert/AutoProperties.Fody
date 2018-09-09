@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using FodyTools;
+
 using JetBrains.Annotations;
 
 using Mono.Cecil;
@@ -59,8 +61,7 @@ namespace AutoProperties.Fody
                 return false;
             }
 
-            var operand = instruction.Operand as MethodDefinition;
-            if (operand == null)
+            if (!(instruction.Operand is MethodDefinition operand))
             {
                 return false;
             }
@@ -94,8 +95,7 @@ namespace AutoProperties.Fody
             if (instruction?.OpCode.Code != Code.Call)
                 return false;
 
-            var operand = instruction.Operand as GenericInstanceMethod;
-            if (operand == null)
+            if (!(instruction.Operand is GenericInstanceMethod operand))
                 return false;
 
             if (operand.DeclaringType?.FullName != "AutoProperties.BackingFieldAccessExtensions")

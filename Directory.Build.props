@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+
+  <PropertyGroup>
+    <Authors>tom-englert</Authors>
+    <Company>tom-englert.de</Company>
+    <Copyright>Copyright © tom-englert.de 2017-2018. Distributed under the MIT License.</Copyright>
+    <Product>AutoProperties.Fody</Product>
+    <Version>1.14</Version>
+    <PackageTags>ILWeaving, Fody, Cecil, Property, AutoProperty</PackageTags>
+    <Description>This add-in gives you extended control over auto-properties, like directly accessing the backing field or intercepting getters and setters.</Description>
+    <PackageLicenseUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/tom-englert/AutoProperties.Fody</PackageProjectUrl>
+    <PackageIconUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/Icons/package_icon.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/tom-englert/AutoProperties.Fody.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <LanguageTargets>$(MSBuildExtensionsPath)\$(VisualStudioVersion)\Bin\Microsoft.CSharp.targets</LanguageTargets>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net40-client'">
+    <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>client</TargetFrameworkProfile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81'">
+    <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
+    <DefineConstants>$(DefineConstants);PORTABLE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='portable40-net40+sl5+win8+wp8+wpa81'">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="*" PrivateAssets="All" />
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="*" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

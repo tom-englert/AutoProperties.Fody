@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Linq;
 
+using FodyTools;
+
 using JetBrains.Annotations;
 
 using Mono.Cecil;

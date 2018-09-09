@@ -1,33 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
     <AssemblyOriginatorKeyFile>..\key.snk</AssemblyOriginatorKeyFile>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup>
-    <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\AutoProperties.Fody.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FodyCecil" Version="3.0.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="FodyHelpers" Version="3.0.1" />
-    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
+    <PackageReference Include="FodyHelpers" Version="3.2.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\FodyTools\FodyTools\InstructionSequence.cs" Link="InstructionSequence.cs" />
+    <Compile Include="..\FodyTools\FodyTools\InstructionSequences.cs" Link="InstructionSequences.cs" />
     <Compile Include="..\FodyTools\FodyTools\SystemReferenceExtensionsMethods.cs" Link="SystemReferenceExtensionsMethods.cs" />
-    <Compile Include="..\Trademark.cs">
-      <Link>Trademark.cs</Link>
-    </Compile>
-    <Compile Include="..\Version.cs">
-      <Link>Version.cs</Link>
-    </Compile>
     <None Include="..\AutoProperties.Fody.ruleset">
       <Link>AutoProperties.Fody.ruleset</Link>
-      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <Target Name="Postbuild" AfterTargets="Build">
+  <Target Name="Postbuild" AfterTargets="Build" Condition="$(TargetFramework)=='net46'">
     <Message Text="Test" />
     <MakeDir Directories="$(SolutionDir)Tools" />
     <Copy SourceFiles="$(TargetDir)AutoProperties.Fody.dll" DestinationFolder="$(SolutionDir)Tools" />
