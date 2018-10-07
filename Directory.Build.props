@@ -14,6 +14,7 @@
     <PackageIconUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/Icons/package_icon.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/tom-englert/AutoProperties.Fody.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageOutputPath>$(SolutionDir)Deploy</PackageOutputPath>
   </PropertyGroup>
 
   <PropertyGroup>
