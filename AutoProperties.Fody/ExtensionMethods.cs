@@ -262,7 +262,9 @@ namespace AutoProperties.Fody
         [NotNull]
         public static MethodReference GetReference([NotNull] this MethodReference callee, [NotNull] TypeReference callingType)
         {
-            return callingType.Module.ImportReference(InnerGetReference(callee, callingType));
+            var genericParameterProvider = callingType.Module.TryImportReference(callingType.Resolve()?.GetSelfAndBaseTypes().FirstOrDefault(t => t.HasGenericParameters));
+
+            return callingType.Module.ImportReference(InnerGetReference(callee, callingType), genericParameterProvider);
         }
 
         [NotNull]
@@ -291,13 +293,11 @@ namespace AutoProperties.Fody
                         if (!argument.ContainsGenericParameter)
                             continue;
 
-                        for (var k = 0; k < genericParameters.Length; k++)
-                        {
-                            if (genericParameters[k].Name != argument.Name)
-                                continue;
+                        var position = ((GenericParameter)argument).Position;
 
-                            arguments[i] = genericArguments[k];
-                            break;
+                        if (genericParameters.Length > position)
+                        {
+                            arguments[i] = genericArguments[position];
                         }
                     }
 
@@ -327,6 +327,12 @@ namespace AutoProperties.Fody
         public static MethodReference TryImportReference([NotNull] this ModuleDefinition module, [CanBeNull] MethodReference method)
         {
             return method == null ? null : module.ImportReference(method);
+        }
+
+        [CanBeNull]
+        public static TypeReference TryImportReference([NotNull] this ModuleDefinition module, [CanBeNull] TypeReference type)
+        {
+            return type == null ? null : module.ImportReference(type);
         }
     }
 }

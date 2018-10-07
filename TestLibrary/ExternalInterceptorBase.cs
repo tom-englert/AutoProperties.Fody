@@ -36,6 +36,38 @@ namespace TestLibrary
         {
             _field = Convert.ToInt32(value);
         }
+    }
 
+    public class BaseClass1<T1, T2>
+    {
+        public T1 DoSomething()
+        {
+            return default(T1);
+        }
+        public T2 DoSomethingElse()
+        {
+            return default(T2);
+        }
+
+        [GetInterceptor]
+        protected object Getter(string propertyName)
+        {
+            return null;
+        }
+
+        [SetInterceptor]
+        protected void Setter(string propertyName, object newValue)
+        {
+        }
+    }
+
+    public class BaseClass2<T> : BaseClass1<T, int>
+    {
+        public string BaseName { get; set; }
+    }
+
+    public class FinalClass : BaseClass2<string>
+    {
+        public string Name { get; set; }
     }
 }

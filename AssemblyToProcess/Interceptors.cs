@@ -310,7 +310,6 @@ public class ClassWithBadGenericInterceptors
     public string Property2 { get; set; }
 }
 
-
 public class ClassWithUnsupportedParameter
 {
     private int _field = 42;

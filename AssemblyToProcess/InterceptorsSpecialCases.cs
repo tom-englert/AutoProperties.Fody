@@ -85,6 +85,27 @@ namespace AssemblyToProcess
             => fieldValue = newValue;
     }
 
+    public class BaseClass2<T> : TestLibrary.BaseClass1<T, double>
+    {
+        public string BaseName { get; set; }
+    }
+
+    public class FinalClass1 : TestLibrary.BaseClass2<string>
+    {
+        public string Name { get; set; }
+    }
+
+    public class FinalClass2 : BaseClass2<string>
+    {
+        public string Name { get; set; }
+    }
+
+    public class FinalClass3 : TestLibrary.FinalClass
+    {
+        public new string Name { get; set; }
+    }
+
+
     public static class GenericTests
     {
         [Export]
