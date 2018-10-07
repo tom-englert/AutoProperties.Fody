@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FodyPackaging" Version="3.2.6" PrivateAssets="All" />
+    <PackageReference Include="FodyPackaging" Version="3.2.9" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
