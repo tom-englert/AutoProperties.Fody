@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
+    <DisableFody>true</DisableFody>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <NoWarn>1701;1702;618</NoWarn>
