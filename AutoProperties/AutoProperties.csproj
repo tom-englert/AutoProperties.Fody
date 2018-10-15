@@ -12,4 +12,8 @@
     <PackageReference Include="Fody" Version="3.2.9" PrivateAssets="None" />
   </ItemGroup>
 
+  <Target Name="ClearDeploy" BeforeTargets="GenerateNuspec">
+    <RemoveDir Directories="$(PackageOutputPath)" />
+  </Target>
+
 </Project>
