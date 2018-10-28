@@ -12,7 +12,7 @@
   <ItemGroup>
     <Compile Include="..\FodyTools\FodyTools\InstructionSequence.cs" Link="InstructionSequence.cs" />
     <Compile Include="..\FodyTools\FodyTools\InstructionSequences.cs" Link="InstructionSequences.cs" />
-    <Compile Include="..\FodyTools\FodyTools\SystemReferenceExtensionsMethods.cs" Link="SystemReferenceExtensionsMethods.cs" />
+    <Compile Include="..\FodyTools\FodyTools\TypeSystemExtensionMethods.cs" Link="TypeSystemExtensionMethods.cs" />
     <None Include="..\AutoProperties.Fody.ruleset">
       <Link>AutoProperties.Fody.ruleset</Link>
     </None>
