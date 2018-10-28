@@ -12,8 +12,7 @@
     <PackageLicenseUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/tom-englert/AutoProperties.Fody</PackageProjectUrl>
     <PackageIconUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/Icons/package_icon.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/tom-englert/AutoProperties.Fody.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageOutputPath>$(SolutionDir)Deploy</PackageOutputPath>
   </PropertyGroup>
 
@@ -41,7 +40,7 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="*" PrivateAssets="All" />
-    <PackageReference Include="SourceLink.Create.CommandLine" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
