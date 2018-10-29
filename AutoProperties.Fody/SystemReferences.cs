@@ -18,6 +18,7 @@ namespace AutoProperties.Fody
     {
         public SystemReferences([NotNull] BaseModuleWeaver weaver)
         {
+#pragma warning disable CS1720 // Expression will always cause a System.NullReferenceException because the type's default value is null
             GetFieldFromHandle = weaver.ImportMethod(() => FieldInfo.GetFieldFromHandle(default(RuntimeFieldHandle)));
             PropertyInfoType = weaver.ImportType<PropertyInfo>();
             GetTypeFromHandle = weaver.ImportMethod(() => Type.GetTypeFromHandle(default(RuntimeTypeHandle)));

@@ -8,8 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FodyPackaging" Version="3.2.9" PrivateAssets="All" />
-    <PackageReference Include="Fody" Version="3.2.9" PrivateAssets="None" />
+    <PackageReference Include="FodyPackaging" Version="3.2.13" PrivateAssets="All" />
+    <PackageReference Include="Fody" Version="3.2.13" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <Target Name="ClearDeploy" BeforeTargets="GenerateNuspec">

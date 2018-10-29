@@ -39,4 +39,8 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All" />
   </ItemGroup>
 
+  <ItemGroup>
+    <WeaverFiles Include="$(SolutionDir)$(Product)\bin\$(Configuration)\Net46\$(Product).dll" />
+  </ItemGroup>
+
 </Project>
