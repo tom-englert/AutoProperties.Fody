@@ -4,10 +4,7 @@ configuration: Release
 platform: Any CPU
 install:
 - cmd: git submodule update --init --recursive
-before_build:
-- cmd: nuget restore AutoProperties.sln
-build:
-  project: AutoProperties.sln
-  verbosity: minimal
+build_script:
+- cmd: MSBuild -restore /p:Configuration=Release /verbosity:minimal
 artifacts:
 - path: Deploy/*.nupkg
