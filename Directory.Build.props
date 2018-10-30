@@ -7,13 +7,9 @@
     <Copyright>Copyright © tom-englert.de 2017-2018. Distributed under the MIT License.</Copyright>
     <Product>AutoProperties.Fody</Product>
     <Version>1.17</Version>
-    <PackageTags>ILWeaving, Fody, Cecil, Property, AutoProperty</PackageTags>
     <Description>This add-in gives you extended control over auto-properties, like directly accessing the backing field or intercepting getters and setters.</Description>
-    <PackageLicenseUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/tom-englert/AutoProperties.Fody</PackageProjectUrl>
-    <PackageIconUrl>https://raw.github.com/tom-englert/AutoProperties.Fody/master/Icons/package_icon.png</PackageIconUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <PackageOutputPath>$(SolutionDir)Deploy</PackageOutputPath>
+    <GithubOrganization>tom-englert</GithubOrganization>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net40-client'">

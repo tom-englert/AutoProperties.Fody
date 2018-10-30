@@ -6,4 +6,4 @@ install:
 build_script:
 - cmd: MSBuild -restore /p:Configuration=Release /verbosity:minimal
 artifacts:
-- path: Deploy/*.nupkg
+- path: nugets/*.nupkg

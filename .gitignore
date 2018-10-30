@@ -77,5 +77,4 @@ Desktop.ini
 
 
 .vs
-/Tools
-/Deploy/
+/nugets/

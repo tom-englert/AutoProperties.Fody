@@ -1,5 +1,5 @@
 ### This is an add-in for [Fody](https://github.com/Fody/Fody/) [![Build status](https://ci.appveyor.com/api/projects/status/1xenxkw082fqnku2?svg=true)](https://ci.appveyor.com/project/tom-englert/autoproperties-fody) [![NuGet Status](http://img.shields.io/nuget/v/AutoProperties.Fody.svg?style=flat-square)](https://www.nuget.org/packages/AutoProperties.Fody)
-![Icon](Icons/package_icon.png)
+![Icon](package_icon.png)
 
 this add-in gives you extended control over auto-properties, like directly accessing the backing field or intercepting getters and setters.
 
