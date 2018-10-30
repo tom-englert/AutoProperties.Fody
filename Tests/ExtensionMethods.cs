@@ -39,10 +39,10 @@ namespace Tests
         {
             switch (message.MessageImportance?.ToString())
             {
-                case "Normal":
+                case "Low":
                     return "D: " + message.Text;
 
-                case "High":
+                case "Normal":
                     return "I: " + message.Text;
 
                 default:
