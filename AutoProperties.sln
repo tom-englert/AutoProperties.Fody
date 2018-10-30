@@ -13,6 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoProperties", "AutoPrope
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{658C631F-94E7-40FC-96D5-DF82FFF8B844}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		BackingFieldAccess.md = BackingFieldAccess.md
 		Directory.Build.props = Directory.Build.props
 		PropertyInterception.md = PropertyInterception.md
