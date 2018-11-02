@@ -7,7 +7,7 @@
     <ProjectReference Include="..\AutoProperties\AutoProperties.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fody" Version="3.2.15">
+    <PackageReference Include="Fody" Version="3.2.16">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

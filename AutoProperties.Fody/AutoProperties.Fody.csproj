@@ -7,7 +7,7 @@
     <CodeAnalysisRuleSet>..\AutoProperties.Fody.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FodyHelpers" Version="3.2.15" />
+    <PackageReference Include="FodyHelpers" Version="3.2.16" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\FodyTools\FodyTools\InstructionSequence.cs" Link="InstructionSequence.cs" />

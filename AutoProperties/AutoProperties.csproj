@@ -2,20 +2,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net40-client;netstandard1.0;portable40-net40+sl5+win8+wp8+wpa81</TargetFrameworks>
+    <TargetFrameworks>net40-client;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.0;netstandard2.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>AutoProperties.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\Common.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FodyPackaging" Version="3.2.15" PrivateAssets="All" />
-    <PackageReference Include="Fody" Version="3.2.15" PrivateAssets="all">
+    <PackageReference Include="FodyPackaging" Version="3.2.16" PrivateAssets="All" />
+    <PackageReference Include="Fody" Version="3.2.16" PrivateAssets="all">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
-  <Target Name="ClearDeploy" BeforeTargets="GenerateNuspec">
-    <RemoveDir Directories="$(PackageOutputPath)" />
-  </Target>
 
 </Project>
