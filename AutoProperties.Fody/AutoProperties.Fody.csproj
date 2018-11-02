@@ -1,20 +1,18 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>net46;netstandard2.0</TargetFrameworks>
-    <AssemblyOriginatorKeyFile>..\key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>..\AutoProperties.Fody.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="FodyHelpers" Version="3.2.16" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\FodyTools\FodyTools\InstructionSequence.cs" Link="InstructionSequence.cs" />
     <Compile Include="..\FodyTools\FodyTools\InstructionSequences.cs" Link="InstructionSequences.cs" />
     <Compile Include="..\FodyTools\FodyTools\TypeSystemExtensionMethods.cs" Link="TypeSystemExtensionMethods.cs" />
-    <None Include="..\AutoProperties.Fody.ruleset">
-      <Link>AutoProperties.Fody.ruleset</Link>
-    </None>
   </ItemGroup>
+
 </Project>
