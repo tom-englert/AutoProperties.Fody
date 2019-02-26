@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-
 using FodyTools;
-
 using JetBrains.Annotations;
-
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
@@ -52,7 +49,9 @@ namespace AutoProperties.Fody
                     foreach (var method in allMethods)
                     {
                         if (method.IsConstructor && shouldBypassAutoPropertySetters)
+                        {
                             BypassAutoPropertySetters(method, autoPropertyToBackingFieldMap);
+                        }
 
                         ProcessExtensionMethodCalls(method, autoPropertyToBackingFieldMap);
                     }
@@ -117,7 +116,7 @@ namespace AutoProperties.Fody
 
                 Debug.Assert(method.Body?.Instructions != null, "method.Body.Instructions != null");
 
-                _instructionSequences = new InstructionSequences(method.Body.Instructions, symbolReader?.Read(method)?.SequencePoints);
+                _instructionSequences = new InstructionSequences(method.Body.Instructions, method.ReadSequencePoints(symbolReader));
             }
 
             public void ProcessExtensionMethodCalls([NotNull] string extensionMethodName, [NotNull] Func<AutoPropertyInfo, Instruction> createInstruction)

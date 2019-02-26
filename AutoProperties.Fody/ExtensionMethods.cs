@@ -33,10 +33,15 @@ namespace AutoProperties.Fody
         [CanBeNull]
         public static SequencePoint GetEntryPoint([CanBeNull] this MethodDefinition method, [CanBeNull] ISymbolReader symbolReader)
         {
-            if (method == null)
-                return null;
+            return method.ReadSequencePoints(symbolReader)?.FirstOrDefault();
+        }
 
-            return symbolReader?.Read(method)?.SequencePoints?.FirstOrDefault();
+        [CanBeNull]
+        public static IList<SequencePoint> ReadSequencePoints([CanBeNull] this MethodDefinition method, [CanBeNull] ISymbolReader symbolReader)
+        {
+            return (method?.DebugInformation?.HasSequencePoints == true)
+                ? symbolReader?.Read(method)?.SequencePoints
+                : null;
         }
 
         [ContractAnnotation("propertyName:null => false")]
@@ -176,7 +181,7 @@ namespace AutoProperties.Fody
             if (instructions == null)
                 return;
 
-            var instructionSequences = new InstructionSequences(instructions, symbolReader?.Read(constructor)?.SequencePoints);
+            var instructionSequences = new InstructionSequences(instructions, constructor.ReadSequencePoints(symbolReader));
 
             var newInstructions = new List<Instruction>();
 

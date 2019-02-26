@@ -3,7 +3,6 @@
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -20,6 +19,8 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
 {
     public override void Execute()
     {
+        // System.Diagnostics.Debugger.Launch();
+
         var systemReferences = new SystemReferences(this);
 
         new PropertyAccessorWeaver(this, systemReferences).Execute();
@@ -82,7 +83,7 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
     {
         try
         {
-            return ModuleDefinition.SymbolReader?.Read(method.Resolve())?.SequencePoints?.FirstOrDefault();
+            return method.Resolve().ReadSequencePoints(ModuleDefinition.SymbolReader)?.FirstOrDefault();
         }
         catch
         {
