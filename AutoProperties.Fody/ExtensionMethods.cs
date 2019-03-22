@@ -219,7 +219,7 @@ namespace AutoProperties.Fody
             return (instruction.OpCode == OpCodes.Call)
                    && (instruction.Operand is MethodReference targetMethod)
                    && (targetMethod.Name == ".ctor")
-                   && (targetMethod.DeclaringType == constructor.DeclaringType?.BaseType);
+                   && (targetMethod.DeclaringType.Resolve() == constructor.DeclaringType?.BaseType.Resolve());
         }
 
         [NotNull]

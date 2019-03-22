@@ -18,36 +18,12 @@ namespace AutoProperties.Fody
 
         public bool Equals(TypeReference x, TypeReference y)
         {
-            return GetKey(x) == GetKey(y);
+            return x?.Resolve() == y?.Resolve();
         }
 
         public int GetHashCode([CanBeNull] TypeReference obj)
         {
-            return GetKey(obj)?.GetHashCode() ?? 0;
-        }
-
-        [CanBeNull]
-        private static string GetKey([CanBeNull] TypeReference obj)
-        {
-            if (obj == null)
-                return null;
-
-            return GetAssemblyName(obj.Scope) + "|" + obj.FullName;
-        }
-
-        [CanBeNull]
-        [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute"), SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-        private static string GetAssemblyName([CanBeNull] IMetadataScope scope)
-        {
-            if (scope == null)
-                return null;
-
-            if (scope is ModuleDefinition md)
-            {
-                return md.Assembly.FullName;
-            }
-
-            return scope.ToString();
+            return obj?.Resolve()?.GetHashCode() ?? 0;
         }
     }
 }

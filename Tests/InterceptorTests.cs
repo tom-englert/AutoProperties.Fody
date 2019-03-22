@@ -152,5 +152,14 @@ public class InterceptorTests
         }
 
     }
+
+    [Theory]
+    [InlineData("ClassWithAutoPropertyInitAndGenericBase")]
+    public void ClassWithAutoPropertyInitAndGenericBaseTest([NotNull] string className)
+    {
+        var target = _assembly.GetInstance(className);
+        Assert.Equal("Test", target.Prop2);  // --> OK
+        Assert.Equal("Test2", target.Prop3); // Problem: Actual = null
+    }
 }
 
