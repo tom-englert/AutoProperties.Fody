@@ -5,7 +5,7 @@ using AutoProperties;
 
 public class GenericBaseClass<TClass> 
 {
-    public int Prop1 { get; set; }
+    public TClass Prop1 { get; set; }
 
     public string Prop2 { get; set; } = "Test";
 

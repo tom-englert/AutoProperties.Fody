@@ -255,6 +255,12 @@ namespace AutoProperties.Fody
                         continue;
                     }
 
+                    if (property.PropertyType.IsGenericParameter)
+                    {
+                        _logger.LogWarning($"\tSkip {property.Name}, properties with generic property types are not supported!");
+                        continue;
+                    }
+
                     try
                     {
                         new PropertyWeaver(this, property).Execute(getInterceptor, setInterceptor);
