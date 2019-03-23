@@ -6,6 +6,8 @@ using System.Linq;
 
 using AutoProperties.Fody;
 
+using FodyTools;
+
 using JetBrains.Annotations;
 
 using Mono.Cecil;

@@ -30,20 +30,6 @@ namespace AutoProperties.Fody
             return attributes.FirstOrDefault(attribute => attribute.Constructor?.DeclaringType?.FullName == attributeName);
         }
 
-        [CanBeNull]
-        public static SequencePoint GetEntryPoint([CanBeNull] this MethodDefinition method, [CanBeNull] ISymbolReader symbolReader)
-        {
-            return method.ReadSequencePoints(symbolReader)?.FirstOrDefault();
-        }
-
-        [CanBeNull]
-        public static IList<SequencePoint> ReadSequencePoints([CanBeNull] this MethodDefinition method, [CanBeNull] ISymbolReader symbolReader)
-        {
-            return (method?.DebugInformation?.HasSequencePoints == true)
-                ? symbolReader?.Read(method)?.SequencePoints
-                : null;
-        }
-
         [ContractAnnotation("propertyName:null => false")]
         public static bool IsPropertySetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
         {
@@ -132,36 +118,6 @@ namespace AutoProperties.Fody
                 return default(TValue);
 
             return dictionary.TryGetValue(key, out var value) ? value : default(TValue);
-        }
-
-        public static void AddRange<T>([NotNull, ItemCanBeNull] this IList<T> collection, [NotNull, ItemCanBeNull] params T[] values)
-        {
-            AddRange(collection, (IEnumerable<T>)values);
-        }
-
-        public static void AddRange<T>([NotNull, ItemCanBeNull] this IList<T> collection, [NotNull, ItemCanBeNull] IEnumerable<T> values)
-        {
-            foreach (var value in values)
-            {
-                collection.Add(value);
-            }
-        }
-
-        public static void InsertRange<T>([NotNull, ItemCanBeNull] this IList<T> collection, int index, [NotNull, ItemCanBeNull] params T[] values)
-        {
-            foreach (var value in values)
-            {
-                collection.Insert(index++, value);
-            }
-        }
-
-        public static void Replace<T>([CanBeNull, ItemCanBeNull] this IList<T> collection, [CanBeNull, ItemCanBeNull] IEnumerable<T> values)
-        {
-            if ((collection == null) || (values == null))
-                return;
-
-            collection.Clear();
-            collection.AddRange(values);
         }
 
         public static bool AccessesMember([NotNull] this MethodDefinition method, [NotNull] IMemberDefinition member)

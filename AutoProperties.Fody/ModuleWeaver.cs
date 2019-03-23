@@ -10,12 +10,14 @@ using AutoProperties.Fody;
 
 using Fody;
 
+using FodyTools;
+
 using JetBrains.Annotations;
 
 using Mono.Cecil;
 using Mono.Cecil.Cil;
 
-public class ModuleWeaver : BaseModuleWeaver, ILogger
+public class ModuleWeaver : AbstractModuleWeaver
 {
     public override void Execute()
     {
@@ -39,55 +41,5 @@ public class ModuleWeaver : BaseModuleWeaver, ILogger
     private void CleanReferences()
     {
         new ReferenceCleaner(ModuleDefinition, this).RemoveAttributes();
-    }
-
-    void ILogger.LogDebug(string message)
-    {
-        LogDebug(message);
-    }
-
-    void ILogger.LogInfo(string message)
-    {
-        LogInfo(message);
-    }
-
-    void ILogger.LogWarning(string message)
-    {
-        LogWarning(message);
-    }
-
-    void ILogger.LogError(string message, SequencePoint sequencePoint)
-    {
-        if (sequencePoint != null)
-        {
-            LogErrorPoint(message, sequencePoint);
-        }
-        else
-        {
-            LogError(message);
-        }
-    }
-
-    void ILogger.LogError(string message, MethodReference method)
-    {
-        if (method == null)
-            LogError(message);
-        else
-        {
-            ((ILogger)this).LogError(message, GetFirstSequencePoint(method));
-        }
-    }
-
-    [CanBeNull]
-    private SequencePoint GetFirstSequencePoint([NotNull] MethodReference method)
-    {
-        try
-        {
-            return method.Resolve().ReadSequencePoints(ModuleDefinition.SymbolReader)?.FirstOrDefault();
-        }
-        catch
-        {
-            return null;
-        }
     }
 }

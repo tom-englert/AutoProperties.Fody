@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
-    <CodeAnalysisRuleSet>..\AutoProperties.Test.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
     <DisableFody>true</DisableFody>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -30,9 +30,6 @@
     <Reference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\AutoProperties.Test.ruleset">
-      <Link>AutoProperties.Test.ruleset</Link>
-    </None>
     <None Include="app.config" />
   </ItemGroup>
 </Project>

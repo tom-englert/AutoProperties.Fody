@@ -12,8 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\FodyTools\FodyTools\AbstractModuleWeaver.cs" Link="AbstractModuleWeaver.cs" />
+    <Compile Include="..\FodyTools\FodyTools\CollectionExtensionMethods.cs" Link="CollectionExtensionMethods.cs" />
     <Compile Include="..\FodyTools\FodyTools\InstructionSequence.cs" Link="InstructionSequence.cs" />
     <Compile Include="..\FodyTools\FodyTools\InstructionSequences.cs" Link="InstructionSequences.cs" />
+    <Compile Include="..\FodyTools\FodyTools\MemberExtensionMethods.cs" Link="MemberExtensionMethods.cs" />
     <Compile Include="..\FodyTools\FodyTools\TypeSystemExtensionMethods.cs" Link="TypeSystemExtensionMethods.cs" />
   </ItemGroup>
 

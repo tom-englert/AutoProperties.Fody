@@ -16,13 +16,13 @@ namespace AutoProperties.Fody
     [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
     internal class SystemReferences
     {
-        public SystemReferences([NotNull] BaseModuleWeaver weaver)
+        public SystemReferences([NotNull] ITypeSystem typeSystem)
         {
 #pragma warning disable CS1720 // Expression will always cause a System.NullReferenceException because the type's default value is null
-            GetFieldFromHandle = weaver.ImportMethod(() => FieldInfo.GetFieldFromHandle(default(RuntimeFieldHandle)));
-            PropertyInfoType = weaver.ImportType<PropertyInfo>();
-            GetTypeFromHandle = weaver.ImportMethod(() => Type.GetTypeFromHandle(default(RuntimeTypeHandle)));
-            GetPropertyInfo = weaver.TryImportMethod(() => default(Type).GetProperty(default(string), default(BindingFlags)));
+            GetFieldFromHandle = typeSystem.ImportMethod(() => FieldInfo.GetFieldFromHandle(default(RuntimeFieldHandle)));
+            PropertyInfoType = typeSystem.ImportType<PropertyInfo>();
+            GetTypeFromHandle = typeSystem.ImportMethod(() => Type.GetTypeFromHandle(default(RuntimeTypeHandle)));
+            GetPropertyInfo = typeSystem.TryImportMethod(() => default(Type).GetProperty(default(string), default(BindingFlags)));
         }
 
         [NotNull]

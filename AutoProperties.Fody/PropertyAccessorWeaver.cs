@@ -16,6 +16,8 @@ using MethodAttributes = Mono.Cecil.MethodAttributes;
 
 namespace AutoProperties.Fody
 {
+    using FodyTools;
+
     internal class PropertyAccessorWeaver
     {
         [NotNull]
