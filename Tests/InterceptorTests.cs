@@ -158,8 +158,10 @@ public class InterceptorTests
     public void ClassWithAutoPropertyInitAndGenericBaseTest([NotNull] string className)
     {
         var target = _assembly.GetInstance(className);
-        Assert.Equal("Test", target.Prop2);  // --> OK
-        Assert.Equal("Test2", target.Prop3); // Problem: Actual = null
+        target.Prop1 = 42;
+        Assert.Equal(42, target.Prop1); 
+        Assert.Equal("Test", target.Prop2); 
+        Assert.Equal("Test2", target.Prop3);
     }
 }
 

@@ -3,13 +3,13 @@ using System.Reflection;
 
 using AutoProperties;
 
-public class GenericBaseClass<TClass> 
+public class GenericBaseClass<T> 
 {
-    public TClass Prop1 { get; set; }
+    public T Prop1 { get; set; }
 
     public string Prop2 { get; set; } = "Test";
 
-    public void Temp(TClass x)
+    public void Temp(T x)
     {
 
     }
@@ -27,7 +27,7 @@ public class GenericBaseClass<TClass>
     }
 }
 
-public class ClassWithAutoPropertyInitAndGenericBase : GenericBaseClass<string>
+public class ClassWithAutoPropertyInitAndGenericBase : GenericBaseClass<int>
 {
     public string Prop3 { get; set; } = "Test2";
 }
