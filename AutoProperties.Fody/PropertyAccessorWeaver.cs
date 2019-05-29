@@ -254,12 +254,7 @@ namespace AutoProperties.Fody
                         _logger.LogInfo($"\tSkip {property.Name}, has [InterceptIgnore]");
                         continue;
                     }
-
-                    if (property.PropertyType.IsGenericParameter)
-                    {
-                        _logger.LogWarning($"\tSkip {property.Name}, properties with generic property types are not supported!");
-                        continue;
-                    }
+                    
 
                     try
                     {
@@ -484,9 +479,12 @@ namespace AutoProperties.Fody
                                         yield return Instruction.Create(OpCodes.Ldfld, backingField.GetReference());
                                     }
 
-                                    yield return propertyType.IsValueType
-                                        ? Instruction.Create(OpCodes.Box, Import(propertyType))
-                                        : Instruction.Create(OpCodes.Castclass, Import(parameterType));
+                                    if (propertyType.IsGenericParameter || propertyType.IsValueType)
+                                    {
+                                        // we only need to box for value types or if type is generic (no cast for reference)
+                                        yield return Instruction.Create(OpCodes.Box, Import(propertyType));
+                                    }
+
                                     break;
 
                                 default:
