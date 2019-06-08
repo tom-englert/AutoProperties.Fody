@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Copyright>Copyright © tom-englert.de 2017-2019. Distributed under the MIT License.</Copyright>
     <Product>AutoProperties.Fody</Product>
-    <Version>1.21.0</Version>
+    <Version>1.22.0</Version>
     <Description>This add-in gives you extended control over auto-properties, like directly accessing the backing field or intercepting getters and setters.</Description>
   </PropertyGroup>
 
