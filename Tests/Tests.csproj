@@ -11,6 +11,9 @@
     <NoWarn>1701;1702;618</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\FodyTools\FodyTools.Tests\Tools\ModuleHelper.cs" Link="ModuleHelper.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\AssemblyToProcess\AssemblyToProcess.csproj" />
     <ProjectReference Include="..\AutoProperties.Fody\AutoProperties.Fody.csproj" />
     <ProjectReference Include="..\AutoProperties\AutoProperties.csproj" />

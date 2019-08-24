@@ -11,6 +11,8 @@ using Xunit.Abstractions;
 
 namespace CecilTests
 {
+    using FodyTools.Tests.Tools;
+
     public class GenericsTests
     {
         private readonly ITestOutputHelper _testOutputHelper;
@@ -23,7 +25,7 @@ namespace CecilTests
         [Fact]
         public void GenericTest()
         {
-            var module = ModuleDefinition.ReadModule(typeof(GenericsTests).Assembly.Location);
+            var module = typeof(GenericsTests).LoadModule();
 
             foreach (var type in module.GetTypes().Where(t => t.IsClass && t.BaseType != null))
             {
