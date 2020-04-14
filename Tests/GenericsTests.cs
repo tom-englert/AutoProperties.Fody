@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
+﻿// ReSharper disable all
+using System.ComponentModel;
 using System.Linq;
 
 using AutoProperties.Fody;
 
-using Mono.Cecil;
 using Mono.Cecil.Rocks;
 
 using Xunit;

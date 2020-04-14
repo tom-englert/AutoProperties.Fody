@@ -1,4 +1,5 @@
 using AutoProperties;
+// ReSharper disable CheckNamespace
 
 public class ClassWithExplicitInitializedAutoPropertiesDerivedProperDesign : ClassWithExplicitInitializedAutoProperties
 {

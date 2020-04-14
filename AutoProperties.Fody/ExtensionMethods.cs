@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using FodyTools;
-
-using JetBrains.Annotations;
-
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-
-namespace AutoProperties.Fody
+﻿namespace AutoProperties.Fody
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+
+    using FodyTools;
+
+    using Mono.Cecil;
+    using Mono.Cecil.Cil;
+
     internal static class ExtensionMethods
     {
-        public static bool? ShouldBypassAutoPropertySettersInConstructors([CanBeNull] this ICustomAttributeProvider node)
+        public static bool? ShouldBypassAutoPropertySettersInConstructors(this ICustomAttributeProvider? node)
         {
-            // ReSharper disable once AssignNullToNotNullAttribute
             return node?
                 .CustomAttributes
                 .GetAttribute(AttributeNames.BypassAutoPropertySettersInConstructors)?
@@ -24,26 +22,22 @@ namespace AutoProperties.Fody
                 .FirstOrDefault();
         }
 
-        [CanBeNull]
-        public static CustomAttribute GetAttribute([NotNull, ItemNotNull] this IEnumerable<CustomAttribute> attributes, [CanBeNull] string attributeName)
+        public static CustomAttribute? GetAttribute(this IEnumerable<CustomAttribute> attributes, string? attributeName)
         {
             return attributes.FirstOrDefault(attribute => attribute.Constructor?.DeclaringType?.FullName == attributeName);
         }
 
-        [ContractAnnotation("propertyName:null => false")]
-        public static bool IsPropertySetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
+        public static bool IsPropertySetterCall(this Instruction instruction, [NotNullWhen(true)] out string? propertyName)
         {
             return IsPropertyCall(instruction, "set_", out propertyName);
         }
 
-        [ContractAnnotation("propertyName:null => false")]
-        public static bool IsPropertyGetterCall([NotNull] this Instruction instruction, [CanBeNull] out string propertyName)
+        public static bool IsPropertyGetterCall(this Instruction instruction, [NotNullWhen(true)] out string? propertyName)
         {
             return IsPropertyCall(instruction, "get_", out propertyName);
         }
 
-        [ContractAnnotation("propertyName:null => false")]
-        private static bool IsPropertyCall([NotNull] this Instruction instruction, [NotNull] string prefix, [CanBeNull] out string propertyName)
+        private static bool IsPropertyCall(this Instruction instruction, string prefix, [NotNullWhen(true)] out string? propertyName)
         {
             propertyName = null;
 
@@ -72,16 +66,14 @@ namespace AutoProperties.Fody
             return true;
         }
 
-        [CanBeNull]
-        public static FieldDefinition FindAutoPropertyBackingField([NotNull] this PropertyDefinition property, [NotNull, ItemNotNull] IEnumerable<FieldDefinition> fields)
+        public static FieldDefinition? FindAutoPropertyBackingField(this PropertyDefinition property, IEnumerable<FieldDefinition> fields)
         {
             var propertyName = property.Name;
 
             return fields.FirstOrDefault(field => field.Name == $"<{propertyName}>k__BackingField");
         }
 
-        [ContractAnnotation("instruction:null => false")]
-        public static bool IsExtensionMethodCall([CanBeNull] this Instruction instruction, [CanBeNull] string methodName)
+        public static bool IsExtensionMethodCall(this Instruction? instruction, string? methodName)
         {
             if (instruction?.OpCode.Code != Code.Call)
                 return false;
@@ -98,34 +90,34 @@ namespace AutoProperties.Fody
             return true;
         }
 
-        [NotNull, ItemNotNull]
-        public static IEnumerable<TypeDefinition> GetSelfAndBaseTypes([NotNull] this TypeDefinition type)
+        public static IEnumerable<TypeDefinition> GetSelfAndBaseTypes(this TypeDefinition type)
         {
             yield return type;
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             while ((type = type.BaseType?.Resolve()) != null)
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             {
                 yield return type;
             }
         }
 
-        [CanBeNull]
-        public static TValue GetValueOrDefault<TKey, TValue>([NotNull] this IDictionary<TKey, TValue> dictionary, [CanBeNull] TKey key)
+        public static TValue? GetValueOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey? key)
+            where TKey: class
+            where TValue: class
         {
-#pragma warning disable IDE0041 // Use 'is null' check
-            if (ReferenceEquals(key, null))
-#pragma warning restore IDE0041 // Use 'is null' check
-                return default(TValue);
+            if (key is null)
+                return default;
 
-            return dictionary.TryGetValue(key, out var value) ? value : default(TValue);
+            return dictionary.TryGetValue(key, out var value) ? value : default;
         }
 
-        public static bool AccessesMember([NotNull] this MethodDefinition method, [NotNull] IMemberDefinition member)
+        public static bool AccessesMember(this MethodDefinition method, IMemberDefinition member)
         {
             return method.Body?.Instructions?.Any(inst => inst?.Operand == member) ?? false;
         }
 
-        public static void ReplaceFieldAccessWithPropertySetter([NotNull] this MethodDefinition constructor, [NotNull] IMemberDefinition field, [NotNull] PropertyDefinition property, [CanBeNull] ISymbolReader symbolReader)
+        public static void ReplaceFieldAccessWithPropertySetter(this MethodDefinition constructor, IMemberDefinition field, PropertyDefinition property, ISymbolReader? symbolReader)
         {
             var setMethod = property.SetMethod;
             if (setMethod == null)
@@ -170,7 +162,7 @@ namespace AutoProperties.Fody
             }
         }
 
-        private static bool IsBaseConstructorCall([NotNull] this Instruction instruction, [NotNull] MethodDefinition constructor)
+        private static bool IsBaseConstructorCall(this Instruction instruction, MethodDefinition constructor)
         {
             return (instruction.OpCode == OpCodes.Call)
                    && (instruction.Operand is MethodReference targetMethod)
@@ -178,8 +170,7 @@ namespace AutoProperties.Fody
                    && (targetMethod.DeclaringType.Resolve() == constructor.DeclaringType?.BaseType.Resolve());
         }
 
-        [NotNull]
-        public static FieldReference GetReference([NotNull] this FieldDefinition field)
+        public static FieldReference GetReference(this FieldDefinition field)
         {
             // Make the backing field - even of get-only properties - accessible by the interceptors...
             field.IsInitOnly = false;
@@ -198,14 +189,12 @@ namespace AutoProperties.Fody
             return genericField;
         }
 
-        [NotNull]
-        public static TypeReference GetReference([NotNull] this TypeReference type)
+        public static TypeReference GetReference(this TypeReference type)
         {
             return GetReference(type, type.GenericParameters.Cast<TypeReference>().ToArray());
         }
 
-        [NotNull]
-        private static TypeReference GetReference([NotNull] this TypeReference type, [NotNull, ItemNotNull] ICollection<TypeReference> arguments)
+        private static TypeReference GetReference(this TypeReference type, ICollection<TypeReference> arguments)
         {
             if (!type.HasGenericParameters)
                 return type;
@@ -220,16 +209,14 @@ namespace AutoProperties.Fody
             return instance;
         }
 
-        [NotNull]
-        public static MethodReference GetReference([NotNull] this MethodReference callee, [NotNull] TypeReference callingType)
+        public static MethodReference GetReference(this MethodReference callee, TypeReference callingType)
         {
             var genericParameterProvider = callingType.Module.TryImportReference(callingType.Resolve()?.GetSelfAndBaseTypes().FirstOrDefault(t => t.HasGenericParameters));
 
             return callingType.Module.ImportReference(InnerGetReference(callee, callingType), genericParameterProvider);
         }
 
-        [NotNull]
-        private static MethodReference InnerGetReference([NotNull] MethodReference callee, [NotNull] TypeReference callingType)
+        private static MethodReference InnerGetReference(MethodReference callee, TypeReference callingType)
         {
             var calleeType = callee.DeclaringType.Resolve();
 
@@ -284,14 +271,12 @@ namespace AutoProperties.Fody
             return reference;
         }
 
-        [CanBeNull]
-        public static MethodReference TryImportReference([NotNull] this ModuleDefinition module, [CanBeNull] MethodReference method)
+        public static MethodReference? TryImportReference(this ModuleDefinition module, MethodReference? method)
         {
             return method == null ? null : module.ImportReference(method);
         }
 
-        [CanBeNull]
-        public static TypeReference TryImportReference([NotNull] this ModuleDefinition module, [CanBeNull] TypeReference type)
+        public static TypeReference? TryImportReference(this ModuleDefinition module, TypeReference? type)
         {
             return type == null ? null : module.ImportReference(type);
         }

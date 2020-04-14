@@ -5,23 +5,18 @@ using System.Reflection;
 
 using Fody;
 
-using JetBrains.Annotations;
-
 namespace Tests
 {
     public static class ExtensionMethods
     {
-        [NotNull]
-        public static dynamic GetInstance([NotNull] this Assembly assembly, [NotNull] string className, [NotNull, ItemNotNull] params object[] args)
+        public static dynamic GetInstance(this Assembly assembly, string className, params object[] args)
         {
             var type = assembly.GetType(className, true);
 
-            // ReSharper disable AssignNullToNotNullAttribute
             return Activator.CreateInstance(type, args);
         }
 
-        [NotNull]
-        public static string FormatError([NotNull] this SequencePointMessage error)
+        public static string FormatError(this SequencePointMessage error)
         {
             var message = error.Text;
             var sequencePoint = error.SequencePoint;
@@ -34,10 +29,9 @@ namespace Tests
             return message;
         }
 
-        [NotNull]
-        public static string FormatMessage([NotNull] this LogMessage message)
+        public static string FormatMessage(this LogMessage message)
         {
-            switch (message.MessageImportance?.ToString())
+            switch (message.MessageImportance.ToString())
             {
                 case "Low":
                     return "D: " + message.Text;

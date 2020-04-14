@@ -1,61 +1,56 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-
-using JetBrains.Annotations;
-
-using Tests;
-
-using Xunit;
-using Xunit.Abstractions;
-
-public class WeaverTests
+﻿namespace Tests
 {
-    [NotNull]
-    private readonly ITestOutputHelper _testOutputHelper;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Linq;
 
-    [NotNull]
-    private readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
+    using Xunit;
+    using Xunit.Abstractions;
 
-    public WeaverTests([NotNull] ITestOutputHelper testOutputHelper)
+    public class WeaverTests
     {
-        _testOutputHelper = testOutputHelper;
-    }
+        private readonly ITestOutputHelper _testOutputHelper;
 
-    [Fact]
-    public void OutputWeaverErrors()
-    {
-        foreach (var message in _weaverHelper.Errors)
+        private readonly WeaverHelper _weaverHelper = WeaverHelper.Create();
+
+        public WeaverTests(ITestOutputHelper testOutputHelper)
         {
-            _testOutputHelper.WriteLine(message);
+            _testOutputHelper = testOutputHelper;
         }
 
-        Assert.Equal(12, _weaverHelper.Errors.Count());
-    }
-
-    [Fact]
-    public void OutputWeaverMessages()
-    {
-        foreach (var message in _weaverHelper.Messages)
+        [Fact]
+        public void OutputWeaverErrors()
         {
-            _testOutputHelper.WriteLine(message);
+            foreach (var message in _weaverHelper.Errors)
+            {
+                _testOutputHelper.WriteLine(message);
+            }
+
+            Assert.Equal(12, _weaverHelper.Errors.Count());
         }
-    }
 
-    [Fact]
-    [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-    public void ValidatePropertyChangedIsInjected()
-    {
-        var assembly = _weaverHelper.Assembly;
-        var instance = assembly.GetInstance("ImplementsPropertyChanged");
-        var calls = new List<string>();
+        [Fact]
+        public void OutputWeaverMessages()
+        {
+            foreach (var message in _weaverHelper.Messages)
+            {
+                _testOutputHelper.WriteLine(message);
+            }
+        }
 
-        var inpc = (INotifyPropertyChanged)instance;
-        inpc.PropertyChanged += (sender, args) => calls.Add(args.PropertyName);
+        [Fact]
+        public void ValidatePropertyChangedIsInjected()
+        {
+            var assembly = _weaverHelper.Assembly;
+            var instance = assembly.GetInstance("ImplementsPropertyChanged");
+            var calls = new List<string>();
 
-        instance.Property1 = "Test";
+            var inpc = (INotifyPropertyChanged)instance;
+            inpc.PropertyChanged += (sender, args) => calls.Add(args.PropertyName);
 
-        Assert.True(new[] { "Property1" }.SequenceEqual(calls));
+            instance.Property1 = "Test";
+
+            Assert.True(new[] { "Property1" }.SequenceEqual(calls));
+        }
     }
 }

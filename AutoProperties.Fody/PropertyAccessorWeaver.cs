@@ -1,33 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-
-using JetBrains.Annotations;
-
-using Mono.Cecil;
-using Mono.Cecil.Cil;
-using Mono.Cecil.Rocks;
-
-using FieldAttributes = Mono.Cecil.FieldAttributes;
-using MethodAttributes = Mono.Cecil.MethodAttributes;
-
-namespace AutoProperties.Fody
+﻿namespace AutoProperties.Fody
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+
     using FodyTools;
+
+    using Mono.Cecil;
+    using Mono.Cecil.Cil;
+    using Mono.Cecil.Rocks;
+
+    using FieldAttributes = Mono.Cecil.FieldAttributes;
+    using MethodAttributes = Mono.Cecil.MethodAttributes;
 
     internal class PropertyAccessorWeaver
     {
-        [NotNull]
         private readonly ModuleDefinition _moduleDefinition;
-        [NotNull]
         private readonly SystemReferences _systemReferences;
-        [NotNull]
         private readonly ILogger _logger;
 
-        public PropertyAccessorWeaver([NotNull] ModuleWeaver moduleWeaver, [NotNull] SystemReferences systemReferences)
+        public PropertyAccessorWeaver(ModuleWeaver moduleWeaver, SystemReferences systemReferences)
         {
             _logger = moduleWeaver;
             _moduleDefinition = moduleWeaver.ModuleDefinition;
@@ -40,7 +33,6 @@ namespace AutoProperties.Fody
             {
                 var allTypes = _moduleDefinition.GetTypes();
 
-                // ReSharper disable once AssignNullToNotNullAttribute
                 var allClasses = allTypes
                     .Where(type => type != null && type.IsClass && (type.BaseType != null));
 
@@ -48,8 +40,6 @@ namespace AutoProperties.Fody
 
                 foreach (var classDefinition in allClasses.SelectMany(item => item.GetSelfAndBaseTypes().Reverse()))
                 {
-                    Debug.Assert(classDefinition != null, nameof(classDefinition) + " != null");
-
                     if (allInterceptors.ContainsKey(classDefinition))
                         continue;
 
@@ -67,7 +57,6 @@ namespace AutoProperties.Fody
                     }
                 }
 
-                // ReSharper disable once PossibleNullReferenceException
                 foreach (var interceptors in allInterceptors.Values.Where(item => (item.ClassDefinition.Module == _moduleDefinition)))
                 {
                     try
@@ -89,24 +78,17 @@ namespace AutoProperties.Fody
 
         private class Interceptors
         {
-            [NotNull]
             private readonly PropertyAccessorWeaver _weaver;
+            private readonly Interceptors? _baseTypeInterceptors;
+            private readonly MethodDefinition? _setInterceptor;
+            private readonly MethodDefinition? _getInterceptor;
 
-            [CanBeNull]
-            private readonly Interceptors _baseTypeInterceptors;
-            [CanBeNull]
-            private readonly MethodDefinition _setInterceptor;
-            [CanBeNull]
-            private readonly MethodDefinition _getInterceptor;
-
-            public Interceptors([NotNull] PropertyAccessorWeaver weaver, [NotNull] TypeReference classDefinition, [CanBeNull] Interceptors baseTypeInterceptors)
+            public Interceptors(PropertyAccessorWeaver weaver, TypeReference classDefinition, Interceptors? baseTypeInterceptors)
             {
                 _weaver = weaver;
-                // ReSharper disable once AssignNullToNotNullAttribute
                 ClassDefinition = classDefinition.Resolve();
                 _baseTypeInterceptors = baseTypeInterceptors;
 
-                // ReSharper disable once PossibleNullReferenceException
                 var allMethods = ClassDefinition.Methods;
                 if (allMethods == null)
                     return;
@@ -126,14 +108,11 @@ namespace AutoProperties.Fody
                 VerifyInterceptors();
             }
 
-            [NotNull]
             public TypeDefinition ClassDefinition { get; }
 
-            [CanBeNull]
-            public MethodDefinition SetInterceptor => _setInterceptor ?? WhenAccessibleInDerivedClass(_baseTypeInterceptors?.SetInterceptor);
+            public MethodDefinition? SetInterceptor => _setInterceptor ?? WhenAccessibleInDerivedClass(_baseTypeInterceptors?.SetInterceptor);
 
-            [CanBeNull]
-            public MethodDefinition GetInterceptor => _getInterceptor ?? WhenAccessibleInDerivedClass(_baseTypeInterceptors?.GetInterceptor);
+            public MethodDefinition? GetInterceptor => _getInterceptor ?? WhenAccessibleInDerivedClass(_baseTypeInterceptors?.GetInterceptor);
 
             public void Execute()
             {
@@ -181,8 +160,7 @@ namespace AutoProperties.Fody
                 }
             }
 
-            [CanBeNull]
-            private MethodDefinition WhenAccessibleInDerivedClass([CanBeNull] MethodDefinition baseMethodDefinition)
+            private MethodDefinition? WhenAccessibleInDerivedClass(MethodDefinition? baseMethodDefinition)
             {
                 if (baseMethodDefinition == null)
                     return null;
@@ -199,22 +177,17 @@ namespace AutoProperties.Fody
 
         private class ClassWeaver
         {
-            [NotNull]
             private readonly PropertyAccessorWeaver _weaver;
-            [NotNull]
             private readonly TypeDefinition _classDefinition;
-            [NotNull]
             private readonly ILogger _logger;
 
-            public ClassWeaver([NotNull] PropertyAccessorWeaver weaver, [NotNull] TypeDefinition classDefinition)
+            public ClassWeaver(PropertyAccessorWeaver weaver, TypeDefinition classDefinition)
             {
                 _weaver = weaver;
                 _classDefinition = classDefinition;
                 _logger = _weaver._logger;
             }
 
-            [NotNull]
-            [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
             private MethodDefinition StaticConstructor
             {
                 get
@@ -234,9 +207,7 @@ namespace AutoProperties.Fody
                 }
             }
 
-            [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
-            [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
-            public void Execute([NotNull] Interceptors interceptors)
+            public void Execute(Interceptors interceptors)
             {
                 var getInterceptor = interceptors.GetInterceptor;
                 var setInterceptor = interceptors.SetInterceptor;
@@ -254,11 +225,11 @@ namespace AutoProperties.Fody
                         _logger.LogInfo($"\tSkip {property.Name}, has [InterceptIgnore]");
                         continue;
                     }
-                    
+
 
                     try
                     {
-                        new PropertyWeaver(this, property).Execute(getInterceptor, setInterceptor);
+                        new PropertyWeaver(this, property).Execute(getInterceptor!, setInterceptor!);
                     }
                     catch (WeavingException ex)
                     {
@@ -269,24 +240,17 @@ namespace AutoProperties.Fody
 
             private class PropertyWeaver
             {
-                [NotNull]
                 private readonly ClassWeaver _classWeaver;
-                [NotNull]
                 private readonly PropertyDefinition _property;
-                [NotNull]
                 private readonly SystemReferences _systemReferences;
-                [NotNull]
                 private readonly ModuleDefinition _moduleDefinition;
-                [NotNull]
                 private readonly ILogger _logger;
-                [NotNull]
                 private readonly TypeDefinition _classDefinition;
-                [CanBeNull]
-                private FieldDefinition _propertyInfo;
+                private FieldDefinition? _propertyInfo;
 
                 private bool _isBackingFieldAccessed;
 
-                public PropertyWeaver([NotNull] ClassWeaver classWeaver, [NotNull] PropertyDefinition property)
+                public PropertyWeaver(ClassWeaver classWeaver, PropertyDefinition property)
                 {
                     _classWeaver = classWeaver;
                     _property = property;
@@ -296,9 +260,8 @@ namespace AutoProperties.Fody
                     _classDefinition = _classWeaver._classDefinition;
                 }
 
-                public void Execute([NotNull] MethodDefinition getInterceptor, [NotNull] MethodDefinition setInterceptor)
+                public void Execute(MethodDefinition getInterceptor, MethodDefinition setInterceptor)
                 {
-                    // ReSharper disable once AssignNullToNotNullAttribute
                     var backingField = _property.FindAutoPropertyBackingField(_classDefinition.Fields);
                     if (backingField == null)
                     {
@@ -335,9 +298,6 @@ namespace AutoProperties.Fody
                     _property.SetMethod?.Body?.Instructions.Replace(newSetter);
                 }
 
-                [NotNull]
-                [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
-                [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
                 private FieldDefinition PropertyInfo
                 {
                     get
@@ -367,11 +327,9 @@ namespace AutoProperties.Fody
                     }
                 }
 
-                [CanBeNull]
-                private TypeReference Import([CanBeNull] TypeReference type) => type == null ? null : _moduleDefinition.ImportReference(type);
+                private TypeReference? Import(TypeReference? type) => type == null ? null : _moduleDefinition.ImportReference(type);
 
-                [CanBeNull, ItemNotNull]
-                private IEnumerable<Instruction> BuildGetter([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition getInterceptor)
+                private IEnumerable<Instruction>? BuildGetter(FieldDefinition backingField, MethodDefinition? getInterceptor)
                 {
                     var getMethod = _property.GetMethod;
                     if (getMethod == null)
@@ -387,8 +345,7 @@ namespace AutoProperties.Fody
                     return BuildInstructions(backingField, getInterceptor, false).ToArray();
                 }
 
-                [CanBeNull, ItemNotNull]
-                private IEnumerable<Instruction> BuildSetter([NotNull] FieldDefinition backingField, [CanBeNull] MethodDefinition setInterceptor)
+                private IEnumerable<Instruction>? BuildSetter(FieldDefinition backingField, MethodDefinition? setInterceptor)
                 {
                     var setMethod = _property.SetMethod;
                     if (setMethod == null)
@@ -404,26 +361,17 @@ namespace AutoProperties.Fody
                     return BuildInstructions(backingField, setInterceptor, true).ToArray();
                 }
 
-                [NotNull, ItemNotNull]
-                [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
-                private IEnumerable<Instruction> BuildInstructions([NotNull] FieldDefinition backingField, [NotNull] MethodDefinition interceptor, bool isSetter)
+                private IEnumerable<Instruction> BuildInstructions(FieldDefinition backingField, MethodDefinition interceptor, bool isSetter)
                 {
                     yield return Instruction.Create(OpCodes.Ldarg_0);
 
                     var propertyType = _property.PropertyType;
-                    Debug.Assert(propertyType != null, nameof(propertyType) + " != null");
-
                     var parameters = interceptor.Parameters;
-                    Debug.Assert(parameters != null, nameof(parameters) + " != null");
 
                     foreach (var parameter in parameters)
                     {
-                        Debug.Assert(parameter != null, nameof(parameter) + " != null");
-
                         var parameterType = parameter.ParameterType;
-                        Debug.Assert(parameterType != null, nameof(parameterType) + " != null");
 
-                        // ReSharper disable once PossibleNullReferenceException
                         if (parameterType.IsByReference && parameterType.GetElementType().IsGenericParameter)
                         {
                             _isBackingFieldAccessed = true;
@@ -457,7 +405,6 @@ namespace AutoProperties.Fody
                                     break;
 
                                 case "System.Reflection.PropertyInfo":
-                                    // ReSharper disable once ArrangeRedundantParentheses
                                     yield return Instruction.Create(OpCodes.Ldsfld, PropertyInfo.GetReference());
                                     break;
 
@@ -495,12 +442,10 @@ namespace AutoProperties.Fody
 
                     if (interceptor.ContainsGenericParameter)
                     {
-                        // ReSharper disable once PossibleNullReferenceException
                         if (interceptor.GenericParameters.Count != 1)
                             throw new WeavingException($"Only one generic parameter is supported in the interceptor {interceptor}.", interceptor);
 
                         var generic = new GenericInstanceMethod(interceptor.GetReference(_classDefinition));
-                        // ReSharper disable once PossibleNullReferenceException
                         generic.GenericArguments.Add(Import(propertyType));
 
                         yield return Instruction.Create(OpCodes.Call, generic);

@@ -1,20 +1,17 @@
-﻿using System;
-
-using JetBrains.Annotations;
-
-using Mono.Cecil;
-
-namespace AutoProperties.Fody
+﻿namespace AutoProperties.Fody
 {
+    using System;
+
+    using Mono.Cecil;
+
     internal class WeavingException : Exception
     {
-        public WeavingException([NotNull] string message, [CanBeNull] MethodReference method = null)
+        public WeavingException(string message, MethodReference? method = null)
             : base(message)
         {
             Method = method;
         }
 
-        [CanBeNull]
-        public MethodReference Method { get; }
+        public MethodReference? Method { get; }
     }
 }

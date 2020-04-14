@@ -1,19 +1,15 @@
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-
-using JetBrains.Annotations;
-
-using Mono.Cecil;
-
 namespace AutoProperties.Fody
 {
+    using System.Collections.Generic;
+
+    using Mono.Cecil;
+
     internal class TypeReferenceEqualityComparer : IEqualityComparer<TypeReference>
     {
         private TypeReferenceEqualityComparer()
         {
         }
 
-        [NotNull]
         public static IEqualityComparer<TypeReference> Default { get; } = new TypeReferenceEqualityComparer();
 
         public bool Equals(TypeReference x, TypeReference y)
@@ -21,9 +17,9 @@ namespace AutoProperties.Fody
             return x?.Resolve() == y?.Resolve();
         }
 
-        public int GetHashCode([CanBeNull] TypeReference obj)
+        public int GetHashCode(TypeReference obj)
         {
-            return obj?.Resolve()?.GetHashCode() ?? 0;
+            return obj.Resolve()?.GetHashCode() ?? 0;
         }
     }
 }

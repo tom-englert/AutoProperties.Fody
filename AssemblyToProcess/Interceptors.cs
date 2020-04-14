@@ -1,14 +1,10 @@
-﻿using System;
+﻿// ReSharper disable all
+using System;
 using System.Reflection;
 
 using AutoProperties;
 
 using TestLibrary;
-
-// ReSharper disable UnusedMember.Local
-// ReSharper disable UnusedParameter.Local
-// ReSharper disable PossibleNullReferenceException
-// ReSharper disable AssignNullToNotNullAttribute
 
 public class ClassWithSimpleInterceptors
 {

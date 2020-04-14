@@ -2,6 +2,9 @@
 using System.Reflection;
 
 using AutoProperties;
+// ReSharper disable CheckNamespace
+// ReSharper disable UnusedMember.Global
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
 
 public class GenericBaseClass<T> 
 {
@@ -15,13 +18,14 @@ public class GenericBaseClass<T>
     }
     
     [SetInterceptor]
-    protected void SetValue<T>(string name, Type propertyType, PropertyInfo propertyInfo, object newValue, T genericNewValue, ref T refToBackingField)
+    // ReSharper disable once RedundantAssignment
+    protected void SetValue<T1>(string name, Type propertyType, PropertyInfo propertyInfo, object newValue, T1 genericNewValue, ref T1 refToBackingField)
     {
         refToBackingField = genericNewValue;
     }
 
     [GetInterceptor]
-    protected T GetValue<T>(string name, Type propertyType, PropertyInfo propertyInfo, object fieldValue, T genericFieldValue, ref T refToBackingField)
+    protected T1 GetValue<T1>(string name, Type propertyType, PropertyInfo propertyInfo, object fieldValue, T1 genericFieldValue, ref T1 refToBackingField)
     {
         return genericFieldValue;
     }
